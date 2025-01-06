@@ -86,3 +86,30 @@ def get_total_number_of_domestic_passengers_by_country():
     Fonction qui renvoi le total de passagers domestiques par pays en JSON
     """
     return service.get_domestic_total()
+
+@passengers_bp.get("/international-total")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": "Retourne le volume total de passagers internationaux par pays",
+    "responses": {
+        200: {
+            "description": "Volume total de passagers internationaux par pays",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "international_totals": {
+                        "type": "object",
+                        "additionalProperties": {"type": "number"},
+                        "example": {"FRA": 800000, "USA": 1500000}
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_total_number_of_international_passengers_by_country():
+    """
+    Fonction qui renvoi le total de passagers internationaux par pays en JSON
+    """
+    return service.get_international_total()
