@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from flasgger import Swagger, swag_from
+from http import HTTPStatus
 
 app = Flask(__name__)
 swagger = Swagger(app)
@@ -17,10 +18,6 @@ swagger = Swagger(app)
                     "message": {
                         "type": "string",
                         "example": "Hello, World!"
-                    },
-                    "status": {
-                        "type": "integer",
-                        "example": 200
                     }
                 }
             }
@@ -35,9 +32,8 @@ def hello_world():
         json: A JSON object containing a welcome message and status code
     """
     return jsonify({
-        "message": "Hello, World!",
-        "status": 200
-    })
+        "message": "Hello, World!"
+    }), HTTPStatus.OK
 
 if __name__ == "__main__":
     app.run(debug=True)
