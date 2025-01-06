@@ -30,4 +30,18 @@ class PassengersService:
                 "details": str(error)
             }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-    
+    def get_domestic_total(self):
+        """
+        Retourne le total des passagers domestiques par pays
+        """
+        try:
+            df = pd.read_csv(self.file_path)
+            totals = (df[df['Domestic'].notna()]['Domestic'] * 1000).groupby(df['ISO3']).sum()
+            return jsonify({
+                "domestic_totals": totals.to_dict()
+            }), HTTPStatus.OK
+        except ImportError as error:
+            return jsonify({
+                "error": "Erreur lors de la lecture du fichier",
+                "details": str(error)
+            }), HTTPStatus.INTERNAL_SERVER_ERROR
