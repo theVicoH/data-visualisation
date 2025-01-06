@@ -54,8 +54,35 @@ def passengers_coucou():
         500: {"description": "Erreur lors de la lecture du fichier"}
     }
 })
-def get_total_passengers_by_country():
+def get_total_number_of_passengers_by_country():
     """
     Fonction qui renvoi le total de passagers de tous les pays en JSON
     """
     return service.get_total_by_country()
+
+@passengers_bp.get("/domestic-total")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": "Retourne le volume total de passagers domestiques par pays",
+    "responses": {
+        200: {
+            "description": "Volume total de passagers domestiques par pays",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "domestic_totals": {
+                        "type": "object",
+                        "additionalProperties": {"type": "number"},
+                        "example": {"FRA": 800000, "USA": 1500000}
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_total_number_of_domestic_passengers_by_country():
+    """
+    Fonction qui renvoi le total de passagers domestiques par pays en JSON
+    """
+    return service.get_domestic_total()
