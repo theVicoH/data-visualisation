@@ -113,3 +113,49 @@ def get_total_number_of_international_passengers_by_country():
     Fonction qui renvoi le total de passagers internationaux par pays en JSON
     """
     return service.get_international_total()
+
+@passengers_bp.get("/country/<iso3>")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": 
+      "Retourne le total de passagers domestiques et internationaux pour un pays spécifique",
+    "parameters": [
+        {
+            "name": "iso3",
+            "in": "path",
+            "type": "string",
+            "required": True,
+            "description": "Code ISO3 du pays",
+            "example": "FRA"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Totaux des passagers pour le pays",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "country": {
+                        "type": "string",
+                        "example": "FRA"
+                    },
+                    "domestic_total": {
+                        "type": "number",
+                        "example": 800000
+                    },
+                    "international_total": {
+                        "type": "number",
+                        "example": 1500000
+                    }
+                }
+            }
+        },
+        404: {"description": "Pays non trouvé"},
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_all_totals_passenger_by_country(iso3):
+    """
+    Retourne les totaux de passagers pour un pays spécifique
+    """
+    return service.get_totals_by_country(iso3)
