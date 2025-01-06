@@ -13,9 +13,13 @@ jsonschema-specifications==2024.10.1
 MarkupSafe==3.0.2
 mccabe==0.7.0
 mistune==3.1.0
+numpy==2.2.1
 packaging==24.2
+pandas==2.2.3
 platformdirs==4.3.6
 pylint==3.3.3
+python-dateutil==2.9.0.post0
+pytz==2024.2
 PyYAML==6.0.2
 referencing==0.35.1
 rpds-py==0.22.3
@@ -23,4 +27,5 @@ six==1.17.0
 tomli==2.2.1
 tomlkit==0.13.2
 typing_extensions==4.12.2
+tzdata==2024.2
 Werkzeug==3.1.3
