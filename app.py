@@ -29,7 +29,7 @@ def hello_world():
     Handles the root URL ("/") of the web application.
 
     Returns:
-        json: A JSON object containing a welcome message and status code
+        json: A JSON object containing a welcome message
     """
     return jsonify({
         "message": "Hello, World!"
