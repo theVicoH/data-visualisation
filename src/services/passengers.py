@@ -64,7 +64,7 @@ class PassengersService:
                 "details": str(error)
             }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-    def get_country_totals(self, iso3):
+    def get_totals_by_country(self, iso3):
         """
         Retourne le total des passagers domestiques et internationaux pour un pays
         """
@@ -83,11 +83,15 @@ class PassengersService:
             international_total = (
                 country_data[country_data['International'].notna()]['International'] * 1000
             ).sum()
+            total = (
+                country_data[country_data['Total'].notna()]['Total'] * 1000
+            ).sum()
 
             return jsonify({
                 "country": iso3.upper(),
                 "domestic_total":domestic_total,
-                "international_total": international_total
+                "international_total": international_total,
+                "total": total
             }), HTTPStatus.OK
 
         except ImportError as error:
