@@ -1,6 +1,6 @@
+from http import HTTPStatus
 from flask import Flask, jsonify
 from flasgger import Swagger, swag_from
-from http import HTTPStatus
 
 app = Flask(__name__)
 swagger = Swagger(app)
