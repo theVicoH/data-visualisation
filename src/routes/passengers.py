@@ -33,7 +33,7 @@ def passengers_coucou():
     return jsonify({ "message": "Coucou passengers !" }), HTTPStatus.OK
 
 
-@passengers_bp.route("/total-by-country")
+@passengers_bp.get("/total-by-country")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne le volume total de passagers par pays",
