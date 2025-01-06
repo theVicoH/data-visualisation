@@ -30,8 +30,4 @@ class PassengersService:
                 "details": str(error)
             }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-    def coucou(self):
-        """
-        Fonction qui renvoi un message Coucou passengers ! en JSON
-        """
-        return jsonify({ "message": "Coucou passengers !" }), HTTPStatus.OK
+    
