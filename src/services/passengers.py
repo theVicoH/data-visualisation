@@ -75,7 +75,7 @@ class PassengersService:
             if country_data.empty:
                 return jsonify({
                     "error": "Pays non trouvé"
-                }), HTTPStatus.NOT_FOUND
+                }), HTTPStatus.BAD_REQUEST
 
             domestic_total = (
                 country_data[country_data['Domestic'].notna()]['Domestic'] * 1000

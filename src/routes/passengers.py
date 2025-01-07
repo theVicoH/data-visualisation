@@ -150,7 +150,7 @@ def get_total_number_of_international_passengers_by_country():
                 }
             }
         },
-        404: {"description": "Pays non trouvé"},
+        400: {"description": "Entrez un iso3 valide"},
         500: {"description": "Erreur lors de la lecture du fichier"}
     }
 })
