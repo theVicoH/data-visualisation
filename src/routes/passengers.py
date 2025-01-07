@@ -32,7 +32,7 @@ def get_total_number_of_passengers_by_country():
     Fonction qui renvoi le total de passagers de tous les pays en JSON
     """
     try:
-        country_totals = service.get_total_by_country()
+        country_totals = service.get_totals_group_by_country('Total')
         return jsonify({
             "country_totals": country_totals
         }), HTTPStatus.OK
@@ -67,7 +67,16 @@ def get_total_number_of_domestic_passengers_by_country():
     """
     Fonction qui renvoi le total de passagers domestiques par pays en JSON
     """
-    return service.get_domestic_total()
+    try:
+        domestic_totals = service.get_totals_group_by_country('Domestic')
+        return jsonify({
+            "domestic_totals": domestic_totals
+        }), HTTPStatus.OK
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors de la lecture du fichier",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
 
 @passengers_bp.get("/international-total")
 @swag_from({
@@ -94,7 +103,16 @@ def get_total_number_of_international_passengers_by_country():
     """
     Fonction qui renvoi le total de passagers internationaux par pays en JSON
     """
-    return service.get_international_total()
+    try:
+        international_totals = service.get_totals_group_by_country('International')
+        return jsonify({
+            "international_totals": international_totals
+        }), HTTPStatus.OK
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors de la lecture du fichier",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
 
 @passengers_bp.get("/country/<iso3>")
 @swag_from({
@@ -140,4 +158,16 @@ def get_all_totals_passenger_by_country(iso3):
     """
     Retourne les totaux de passagers pour un pays spécifique
     """
-    return service.get_totals_by_country(iso3)
+    try:
+        result = service.get_all_totals_by_country(iso3)
+
+        if isinstance(result, tuple):
+            return jsonify(result[0]), result[1]
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR

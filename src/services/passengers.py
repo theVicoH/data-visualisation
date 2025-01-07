@@ -12,84 +12,36 @@ class PassengersService:
         Initialisation de la classe PassengerService
         """
         self.file_path = os.path.join('data', 'monthly_passengers.csv')
-
-    def get_total_by_country(self):
-        """
-        Retourne le volume total de passagers par pays
-        """
         try:
-            df = pd.read_csv(self.file_path)
-            totals = (df[df['Total'].notna()]['Total'] * 1000).groupby(df['ISO3']).sum()
-            return totals.to_dict()
+            self.df = pd.read_csv(self.file_path)
         except ImportError as error:
             raise ImportError(f"Erreur lors de la lecture du fichier: {str(error)}")
 
-    def get_domestic_total(self):
+    def get_totals_group_by_country(self, column):
         """
-        Retourne le total des passagers domestiques par pays
+        Retourne le volume total de passagers par pays selon la colonne de donnée
         """
-        try:
-            df = pd.read_csv(self.file_path)
-            totals = (df[df['Domestic'].notna()]['Domestic'] * 1000).groupby(df['ISO3']).sum()
-            return jsonify({
-                "domestic_totals": totals.to_dict()
-            }), HTTPStatus.OK
-        except ImportError as error:
-            return jsonify({
-                "error": "Erreur lors de la lecture du fichier",
-                "details": str(error)
-            }), HTTPStatus.INTERNAL_SERVER_ERROR
+        totals = (self.df[self.df[column].notna()][column] * 1000).groupby(self.df['ISO3']).sum()
+        return totals.to_dict()
 
-    def get_international_total(self):
-        """
-        Retourne le total des passagers internationaux par pays
-        """
-        try:
-            df = pd.read_csv(self.file_path)
-            totals = (
-                df[df['International'].notna()]['International'] * 1000
-            ).groupby(df['ISO3']).sum()
-            return jsonify({
-                "international_totals": totals.to_dict()
-            }), HTTPStatus.OK
-        except ImportError as error:
-            return jsonify({
-                "error": "Erreur lors de la lecture du fichier",
-                "details": str(error)
-            }), HTTPStatus.INTERNAL_SERVER_ERROR
-
-    def get_totals_by_country(self, iso3):
+    def get_all_totals_by_country(self, iso3):
         """
         Retourne le total des passagers domestiques et internationaux pour un pays
         """
-        try:
-            df = pd.read_csv(self.file_path)
-            country_data = df[df['ISO3'] == iso3.upper()]
+        country_data = self.df[self.df['ISO3'] == iso3.upper()]
+        if country_data.empty:
+            return {
+                "error": "Entrez un iso3 valide"
+            }, HTTPStatus.BAD_REQUEST
 
-            if country_data.empty:
-                return jsonify({
-                    "error": "Entrez un iso3 valide"
-                }), HTTPStatus.BAD_REQUEST
+        domestic_totals = self.get_totals_group_by_country('Domestic')
+        international_totals = self.get_totals_group_by_country('International')
+        total_totals = self.get_totals_group_by_country('Total')
 
-            domestic_total = (
-                country_data[country_data['Domestic'].notna()]['Domestic'] * 1000
-            ).sum()
-            international_total = (
-                country_data[country_data['International'].notna()]['International'] * 1000
-            ).sum()
-            total = (
-                country_data[country_data['Total'].notna()]['Total'] * 1000
-            ).sum()
-
-            return jsonify({
-                "country": iso3.upper(),
-                "domestic_total":domestic_total,
-                "international_total": international_total,
-                "total": total
-            }), HTTPStatus.OK
-
-        except ImportError as error:
-            return jsonify({
-                "error": "Erreur lors de la lecture du fichier",
-                "details": str(error)
-            }), HTTPStatus.INTERNAL_SERVER_ERROR
+        iso3 = iso3.upper()
+        return {
+            "country": iso3,
+            "domestic_total": domestic_totals.get(iso3, 0),
+            "international_total": international_totals.get(iso3, 0),
+            "total": total_totals.get(iso3, 0)
+        }
