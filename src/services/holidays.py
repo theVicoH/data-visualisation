@@ -152,3 +152,16 @@ class HolidaysService:
         holiday_count_per_month = filtered_df.groupby('YearMonth').size().to_dict()
 
         return holiday_count_per_month
+
+    def get_total_holidays(self, holiday_type):
+        """
+        Fonction qui renvoie le nombre total de jours fériés
+        dans le monde
+        """
+
+        if holiday_type:
+            filtered_df = self.df[self.df['Type'] == holiday_type]
+        else:
+            filtered_df = self.df
+
+        return {"total": len(filtered_df)}
