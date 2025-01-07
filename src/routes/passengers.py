@@ -8,7 +8,7 @@ passengers_bp = Blueprint('passengers_bp', __name__, url_prefix='/passengers')
 passengers_service = PassengersService()
 date_util = DateUtils()
 
-@passengers_bp.get("/total-by-country")
+@passengers_bp.get("/totals/total/country")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne le volume total de passagers par pays",
@@ -44,7 +44,7 @@ def get_total_number_of_passengers_by_country():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/domestic-total")
+@passengers_bp.get("/totals/domestic/country")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne le volume total de passagers domestiques par pays",
@@ -80,7 +80,7 @@ def get_total_number_of_domestic_passengers_by_country():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/international-total")
+@passengers_bp.get("/totals/international/country")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne le volume total de passagers internationaux par pays",
@@ -116,7 +116,7 @@ def get_total_number_of_international_passengers_by_country():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/totals-country/<iso3>")
+@passengers_bp.get("/totals/country/<iso3>")
 @swag_from({
     "tags": ["Passengers"],
     "description": 
@@ -178,7 +178,7 @@ def get_all_totals_passenger_by_country(iso3):
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/world-total")
+@passengers_bp.get("/totals/world")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne le volume total mondial de passagers",
@@ -211,7 +211,7 @@ def get_world_total():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/date-totals")
+@passengers_bp.get("/date/totals")
 @swag_from({
     "tags": ["Passengers"],
     "description": 
@@ -300,7 +300,7 @@ def get_totals_by_date():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/date-range-totals")
+@passengers_bp.get("/date/range/totals")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne les totaux de passagers sur une période donnée",
