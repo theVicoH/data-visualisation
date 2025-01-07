@@ -1,7 +1,13 @@
 import os
-from http import HTTPStatus
 import pandas as pd
-from flask import jsonify, request
+
+HOLIDAY_TYPES = [
+    "Public holiday",
+    "Observance",
+    "Local holiday",
+    "Local observance",
+    "Special holiday"
+]
 
 class HolidaysService:
     """
@@ -13,231 +19,136 @@ class HolidaysService:
         Initialisation de la classe HolidaysService
         """
         self.file_path = os.path.join('data', 'global_holidays.csv')
+        try:
+            self.df = pd.read_csv(self.file_path)
+        except ImportError as error:
+            raise ImportError(f"Erreur lors de la lecture du fichier: {str(error)}") from error
 
-    def get_holidays_by_country(self):
+    def get_holidays_by_country(self, holiday_type):
         """
         Retourne le nombre de jours fériés par pays
         """
-        try:
-            valid_holiday_types = [
-                "Public holiday",
-                "Observance",
-                "Local holiday",
-                "Local observance",
-                "Special holiday"
-            ]
-            df = pd.read_csv(self.file_path)
+        if holiday_type:
+            filtered_df = self.df[self.df['Type'] == holiday_type]
+        else:
+            filtered_df = self.df
 
-            holiday_type = request.args.get('holiday-type')
+        holidays_count = filtered_df.groupby('ADM_name').size()
+        return holidays_count.to_dict()
 
-            if holiday_type:
-                if holiday_type not in valid_holiday_types:
-                    return jsonify({
-                        "error": "holiday-type non valide"
-                    }), HTTPStatus.BAD_REQUEST
-
-                df = df[df['Type'] == holiday_type]
-
-            holidays_count = df.groupby('ADM_name').size()
-            return jsonify({"data": holidays_count.to_dict()}), HTTPStatus.OK
-
-        except ImportError as error:
-            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
-
-    def get_holidays_for_one_country(self, iso3):
+    def get_holidays_for_one_country(self, iso3, holiday_type):
         """
         Retourne le nombre de jours fériés pour un seul pays
-
-        :param iso3: iso3 du pays dont vous voulez savoir les jours fériés
-        :type iso3: str
         """
-        try:
-            valid_holiday_types = [
-                "Public holiday",
-                "Observance",
-                "Local holiday",
-                "Local observance",
-                "Special holiday"
-            ]
-            df = pd.read_csv(self.file_path)
-            filtered_df = df[df['ISO3'] == iso3.upper()]
+        filtered_df = self.df[self.df['ISO3'] == iso3.upper()]
 
-            if filtered_df.empty:
-                return jsonify({
-                    "error": "iso3 non valide"
-                }), HTTPStatus.BAD_REQUEST
+        if filtered_df.empty:
+            return {}
 
-            holiday_type = request.args.get('holiday-type')
+        if holiday_type:
+            filtered_df = filtered_df[filtered_df['Type'] == holiday_type]
 
-            if holiday_type:
-                if holiday_type not in valid_holiday_types:
-                    return jsonify({
-                        "error": "holiday-type non valide"
-                    }), HTTPStatus.BAD_REQUEST
+        holiday_count = len(filtered_df)
 
-                filtered_df = filtered_df[filtered_df['Type'] == holiday_type]
-                holiday_count = len(filtered_df)
-                return jsonify({
-                    "country": iso3,
-                    "data": holiday_count
-                }), HTTPStatus.OK
+        return {
+            "country": iso3.upper(),
+            "data": holiday_count
+        }
 
-            holiday_count = len(filtered_df)
-
-            return jsonify({
-                "country": iso3,
-                "data": holiday_count
-            }), HTTPStatus.OK
-
-        except ImportError as error:
-            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
-
-    def get_min_max_holidays(self):
+    def get_min_max_holidays(self, holiday_type):
         """
         Retourne le pays avec le moins de jours fériés et
         le pays avec le plus de jours fériés
         """
-        try:
-            valid_holiday_types = [
-                "Public holiday",
-                "Observance",
-                "Local holiday",
-                "Local observance",
-                "Special holiday"
-            ]
-            df = pd.read_csv(self.file_path)
+        if holiday_type:
+            filtered_df = self.df[self.df['Type'] == holiday_type]
+        else:
+            filtered_df = self.df
 
-            holiday_type = request.args.get('holiday-type')
+        holiday_counts = filtered_df.groupby('ADM_name').size()
 
-            if holiday_type:
-                if holiday_type not in valid_holiday_types:
-                    return jsonify({
-                        "error": "holiday-type non valide"
-                    }), HTTPStatus.BAD_REQUEST
+        min_holidays_country = holiday_counts.idxmin()
 
-                df = df[df['Type'] == holiday_type]
+        min_holidays_data = filtered_df[filtered_df['ADM_name'] == min_holidays_country]
 
-            holiday_counts = df.groupby('ADM_name').size()
+        max_holidays_country = holiday_counts.idxmax()
 
-            min_holidays_country = holiday_counts.idxmin()
+        max_holidays_data = filtered_df[filtered_df['ADM_name'] == max_holidays_country]
 
-            min_holidays_data = df[df['ADM_name'] == min_holidays_country]
+        return {
+            "min": {
+                "country": min_holidays_country,
+                "data": len(min_holidays_data[['Date', 'Name']].to_dict(orient='records'))
+            },
+            "max": {
+                "country": max_holidays_country,
+                "data": len(max_holidays_data[['Date', 'Name']].to_dict(orient='records'))
+            }
+        }
 
-            max_holidays_country = holiday_counts.idxmax()
-
-            max_holidays_data = df[df['ADM_name'] == max_holidays_country]
-
-            return jsonify({
-                "min": {
-                    "country": min_holidays_country,
-                    "data": len(min_holidays_data[['Date', 'Name']].to_dict(orient='records'))
-                },
-                "max": {
-                    "country": max_holidays_country,
-                    "data": len(max_holidays_data[['Date', 'Name']].to_dict(orient='records'))
-                }
-            }), HTTPStatus.OK
-
-        except ImportError as error:
-            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
-
-    def get_holidays_repartition_by_type(self):
+    def get_holidays_repartition_by_type(self, country):
         """
         Fonction qui renvoi un dictionnaire avec en clé
         le type de jour férie et en valeur le nombre de jours fériés
         de ce type
         """
-        try:
-            valid_holiday_types = [
-                "Public holiday",
-                "Observance",
-                "Local holiday",
-                "Local observance",
-                "Special holiday"
-            ]
-            df = pd.read_csv(self.file_path)
-            country = request.args.get('country')
+        if country:
+            filtered_df = self.df[self.df['ADM_name'] == country.capitalize()]
+        else:
+            filtered_df = self.df
 
-            if country:
-                if country.capitalize() not in df['ADM_name'].values:
-                    return jsonify({
-                        "error": "country non valide"
-                    }), HTTPStatus.BAD_REQUEST
+        if country and country.capitalize() not in filtered_df['ADM_name'].values:
+            return {}
 
-                df = df[df['ADM_name'] == country.capitalize()]
+        df_filtered = filtered_df[filtered_df['Type'].isin(HOLIDAY_TYPES)]
+        holidays_repartition = df_filtered['Type'].value_counts().to_dict()
 
-            df_filtered = df[df['Type'].isin(valid_holiday_types)]
-            holidays_repartition = df_filtered['Type'].value_counts().to_dict()
+        for holiday_type in HOLIDAY_TYPES:
+            if holiday_type not in holidays_repartition:
+                holidays_repartition[holiday_type] = 0
 
-            for holiday_type in valid_holiday_types:
-                if holiday_type not in holidays_repartition:
-                    holidays_repartition[holiday_type] = 0
+        return holidays_repartition
 
-            return jsonify(
-                holidays_repartition
-            ), HTTPStatus.OK
-
-        except ImportError as error:
-            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
-
-    def get_holidays_by_year(self):
+    def get_holidays_by_year(self, country):
         """
         Fonction qui renvoi le nombre de jours
         fériés par année
         """
 
-        try:
-            df = pd.read_csv(self.file_path)
+        if country:
+            filtered_df = self.df[self.df['ADM_name'] == country.capitalize()]
+        else:
+            filtered_df = self.df
 
-            country = request.args.get('country')
+        if country and country.capitalize() not in filtered_df['ADM_name'].values:
+            return {}
 
-            if country:
-                if country.capitalize() not in df['ADM_name'].values:
-                    return jsonify({
-                        "error": "country non valide"
-                    }), HTTPStatus.BAD_REQUEST
+        filtered_df['Date'] = pd.to_datetime(filtered_df['Date'])
 
-                df = df[df['ADM_name'] == country.capitalize()]
+        filtered_df['Year'] = filtered_df['Date'].dt.year
 
-            df['Date'] = pd.to_datetime(df['Date'])
+        holiday_count_per_year = filtered_df.groupby('Year').size()
 
-            df['Year'] = df['Date'].dt.year
+        return holiday_count_per_year.to_dict()
 
-            holiday_count_per_year = df.groupby('Year').size()
-
-            return jsonify(holiday_count_per_year.to_dict()), HTTPStatus.OK
-
-        except ImportError as error:
-            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
-
-    def get_holidays_by_month(self):
+    def get_holidays_by_month(self, country):
         """
         Fonction qui renvoi le nombre de jours
         fériés par mois
         """
 
-        try:
-            df = pd.read_csv(self.file_path)
+        if country:
+            filtered_df = self.df[self.df['ADM_name'] == country.capitalize()]
+        else:
+            filtered_df = self.df
 
-            country = request.args.get('country')
+        if country and country.capitalize() not in filtered_df['ADM_name'].values:
+            return {}
 
-            if country:
-                if country.capitalize() not in df['ADM_name'].values:
-                    return jsonify({
-                        "error": "country non valide"
-                    }), HTTPStatus.BAD_REQUEST
+        filtered_df['Date'] = pd.to_datetime(filtered_df['Date'])
 
-                df = df[df['ADM_name'] == country.capitalize()]
+        filtered_df['YearMonth'] = filtered_df['Date'].dt.to_period('M').astype(str)
 
-            df['Date'] = pd.to_datetime(df['Date'])
+        holiday_count_per_month = filtered_df.groupby('YearMonth').size().to_dict()
 
-            df['YearMonth'] = df['Date'].dt.to_period('M').astype(str)
-
-            holiday_count_per_month = df.groupby('YearMonth').size().to_dict()
-
-            return jsonify(
-                holiday_count_per_month
-            ), HTTPStatus.OK
-
-        except ImportError as error:
-            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
+        return holiday_count_per_month
