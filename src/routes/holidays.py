@@ -62,7 +62,9 @@ def get_holidays_by_country():
 @swag_from({
     "tags": ["Holidays"],
     "description": 
-      "Retourne le nombre de jours fériés pour un pays spécifique",
+        "Retourne le nombre de jours fériés pour un pays spécifique. "
+        "Vous pouvez également filtrer les jours fériés par type "
+        "(ex. : Public holiday, Observance, etc.).",
     "parameters": [
         {
             "name": "iso3",
@@ -71,11 +73,21 @@ def get_holidays_by_country():
             "required": True,
             "description": "Code ISO3 du pays",
             "example": "FRA"
+        },
+        {
+            "name": "holiday-type",
+            "in": "query",
+            "type": "string",
+            "required": False,
+            "description": 
+                "Type de jour férié à filtrer. Types valides : "
+                "Public holiday, Observance, Local holiday, Local observance, Special holiday.",
+            "example": "Public holiday"
         }
     ],
     "responses": {
         200: {
-            "description": "Nombre de jours fériés pour le pays",
+            "description": "Nombre de jours fériés pour le pays (avec ou sans filtre).",
             "schema": {
                 "type": "object",
                 "properties": {
@@ -86,12 +98,35 @@ def get_holidays_by_country():
                     "data": {
                         "type": "number",
                         "example": 190
-                    },
+                    }
                 }
             }
         },
-        400: {"description": "iso3 non valide"},
-        500: {"description": "Erreur lors de la lecture du fichier"}
+        400: {
+            "description": "Erreur liée à la requête, comme un code ISO3 "
+            "ou un type de jour férié non valide.",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "iso3 non valide"
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "Erreur serveur lors de la lecture du fichier ou d'autres problèmes.",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Erreur lors de la lecture du fichier"
+                    }
+                }
+            }
+        }
     }
 })
 def get_holiday_for_one_country(iso3):
