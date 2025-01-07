@@ -41,7 +41,7 @@ holidays_service = HolidaysService()
 })
 def get_holidays_by_country():
     """
-    Fonction qui renvoi le nombre de jours fériés par pays en JSON
+    Fonction qui renvoi le nombre de jours fériés par pays
     """
 
     try:
