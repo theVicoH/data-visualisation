@@ -33,7 +33,7 @@ def holidays_coucou():
 
 @holidays_bp.get('/holidays-by-country')
 @swag_from({
-    "tags": ["Holidays by country"],
+    "tags": ["Holidays"],
     "description": "Route qui renvoi le nombre de jours fériés par pays en JSON",
     "responses": {
         200: {
