@@ -459,3 +459,72 @@ def get_holidays_by_month():
             "error": "Erreur lors du traitement des données de globals_holidays.csv",
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@holidays_bp.get('/total')
+@swag_from({
+    "tags": ["Holidays"],
+    "description": "Route qui renvoi le total de jours fériés dans le monde en JSON",
+    "parameters": [
+        {
+            "name": "holiday-type",
+            "in": "query",
+            "type": "string",
+            "required": False,
+            "description": 
+                "Type de jour férié à filtrer. Types valides : "
+                "Public holiday, Observance, Local holiday, Local observance, Special holiday.",
+            "example": "Public holiday"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Total de jours fériés dans le monde",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "total": {
+                        "type": "number",
+                        "example": 276
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Erreur liée à la requête, comme un "
+            "un type de jour férié non valide.",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "holiday-type non valide"
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors du traitement des données de globals_holidays.csv"}
+    }
+})
+def get_total_holidays():
+    """
+    Fonction qui renvoi le total de jours fériés dans le monde
+    """
+    try:
+        holiday_type = request.args.get('holiday-type', None)
+
+        if holiday_type and holiday_type not in HOLIDAY_TYPES:
+            return jsonify(
+                {
+                    "error": "holiday-type non valide"
+                }
+            ), HTTPStatus.BAD_REQUEST
+
+        result = holidays_service.get_total_holidays(holiday_type=holiday_type)
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données de globals_holidays.csv ",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
