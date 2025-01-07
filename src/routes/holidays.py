@@ -221,3 +221,70 @@ def get_holiday_min_max():
     le pays avec le plus de jours fériés
     """
     return holidays_service.get_min_max_holidays()
+
+@holidays_bp.get('/repartition-by-type')
+@swag_from({
+    "tags": ["Holidays"],
+    "description": "Route qui renvoi le nombre des jours "
+    "fériés par type",
+    "parameters": [
+        {
+            "name": "country",
+            "in": "query",
+            "type": "string",
+            "required": False,
+            "description": "Pays",
+            "example": "Serbia"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Nombre de jours fériés par type",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "Local holiday": {
+                        "type": "number",
+                        "example": 2307
+                    },
+                    "Local observance": {
+                        "type": "number",
+                        "example": 358
+                    },
+                    "Observance": {
+                        "type": "number",
+                        "example": 10490
+                    },
+                    "Public holiday": {
+                        "type": "number",
+                        "example": 30669
+                    },
+                    "Special holiday": {
+                        "type": "number",
+                        "example": 274
+                    },
+                }
+            }
+        },
+        400: {
+            "description": "Erreur liée à la requête, comme un "
+            "un pays non valide.",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "country non valide"
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_holiday_repartition_by_type():
+    """
+    Fonction qui renvoi le nombre des jours
+    fériés par type
+    """
+    return holidays_service.get_holidays_repartition_by_type()

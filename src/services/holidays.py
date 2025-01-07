@@ -140,3 +140,42 @@ class HolidaysService:
 
         except ImportError as error:
             return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def get_holidays_repartition_by_type(self):
+        """
+        Fonction qui renvoi un dictionnaire avec en clé
+        le type de jour férie et en valeur le nombre de jours fériés
+        de ce type
+        """
+        try:
+            valid_holiday_types = [
+                "Public holiday",
+                "Observance",
+                "Local holiday",
+                "Local observance",
+                "Special holiday"
+            ]
+            df = pd.read_csv(self.file_path)
+            country = request.args.get('country')
+
+            if country:
+                if country.capitalize() not in df['ADM_name'].values:
+                    return jsonify({
+                        "error": "country non valide"
+                    }), HTTPStatus.BAD_REQUEST
+
+                df = df[df['ADM_name'] == country.capitalize()]
+
+            df_filtered = df[df['Type'].isin(valid_holiday_types)]
+            holidays_repartition = df_filtered['Type'].value_counts().to_dict()
+
+            for holiday_type in valid_holiday_types:
+                if holiday_type not in holidays_repartition:
+                    holidays_repartition[holiday_type] = 0
+
+            return jsonify(
+                holidays_repartition
+            ), HTTPStatus.OK
+
+        except ImportError as error:
+            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
