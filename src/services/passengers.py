@@ -15,7 +15,7 @@ class PassengersService:
         try:
             self.df = pd.read_csv(self.file_path)
         except ImportError as error:
-            raise ImportError(f"Erreur lors de la lecture du fichier: {str(error)}")
+            raise ImportError(f"Erreur lors de la lecture du fichier: {str(error)}") from error
 
     def get_totals_group_by_country(self, column):
         """
@@ -44,4 +44,74 @@ class PassengersService:
             "domestic_total": domestic_totals.get(iso3, 0),
             "international_total": international_totals.get(iso3, 0),
             "total": total_totals.get(iso3, 0)
+        }
+
+    def get_totals_by_date(self, year, month=None):
+        """
+        Retourne les totaux de passagers domestiques et internationaux pour une année 
+        et optionnellement un mois spécifique
+        """
+        year_data = self.df[self.df['Year'] == year]
+
+        if year_data.empty:
+            return None
+
+        if month is not None:
+            year_data = year_data[year_data['Month'] == month]
+            if year_data.empty:
+                return None
+
+        domestic_total = round(
+            year_data['Domestic'].sum() * 1000
+        ) if not year_data['Domestic'].empty else 0
+        international_total = round(
+            year_data['International'].sum() * 1000
+        ) if not year_data['International'].empty else 0
+        total = round(
+            year_data['Total'].sum() * 1000
+        ) if not year_data['Total'].empty else 0
+
+        result = {
+            "year": year,
+            "domestic_total": domestic_total,
+            "international_total": international_total,
+            "total": total
+        }
+
+        if month is not None:
+            result["month"] = month
+
+        return result
+
+    def get_totals_by_date_range(self, start_year, start_month, end_year, end_month):
+        """
+        Retourne les totaux entre deux dates
+        """
+
+        for col in ['Domestic', 'International', 'Total']:
+            self.df[col] = pd.to_numeric(self.df[col], errors='coerce')
+
+        mask = (
+            ((self.df['Year'] > start_year) |
+             ((self.df['Year'] == start_year) &
+              (self.df['Month'] >= start_month))) &
+            ((self.df['Year'] < end_year) |
+             ((self.df['Year'] == end_year) &
+              (self.df['Month'] <= end_month)))
+        )
+
+        date_range_data = self.df[mask]
+
+        if date_range_data.empty:
+            return None
+
+        return {
+            "period": {
+                "start": {"year": start_year, "month": start_month},
+                "end": {"year": end_year, "month": end_month}
+            },
+            "domestic_total": round(date_range_data['Domestic'].fillna(0).sum() * 1000),
+            "international_total": round(date_range_data['International'].fillna(0).sum() * 1000),
+            "total": round(date_range_data['Total'].fillna(0).sum() * 1000),
+            "countries": date_range_data['ISO3'].nunique()
         }
