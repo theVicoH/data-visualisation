@@ -179,3 +179,23 @@ class HolidaysService:
 
         except ImportError as error:
             return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
+    
+    def get_holidays_by_year(self):
+        """
+        Fonction qui renvoi le nombre de jours
+        fériés par année
+        """
+
+        try:
+            df = pd.read_csv(self.file_path)
+
+            df['Date'] = pd.to_datetime(df['Date'])
+
+            df['Year'] = df['Date'].dt.year
+
+            holiday_count_per_year = df.groupby('Year').size()
+
+            return jsonify(holiday_count_per_year.to_dict()), HTTPStatus.OK
+
+        except ImportError as error:
+            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
