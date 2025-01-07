@@ -19,7 +19,25 @@ class HolidaysService:
         Retourne le nombre de jours fériés par pays
         """
         try:
+            valid_holiday_types = [
+                "Public holiday",
+                "Observance",
+                "Local holiday",
+                "Local observance",
+                "Special holiday"
+            ]
             df = pd.read_csv(self.file_path)
+
+            holiday_type = request.args.get('holiday-type')
+
+            if holiday_type:
+                if holiday_type not in valid_holiday_types:
+                    return jsonify({
+                        "error": "holiday-type non valide"
+                    }), HTTPStatus.BAD_REQUEST
+
+                df = df[df['Type'] == holiday_type]
+
             holidays_count = df.groupby('ADM_name').size()
             return jsonify({"data": holidays_count.to_dict()}), HTTPStatus.OK
 
@@ -28,7 +46,7 @@ class HolidaysService:
 
     def get_holidays_for_one_country(self, iso3):
         """
-        Retourne le nombre de jours fériés ppur un seul pays
+        Retourne le nombre de jours fériés pour un seul pays
 
         :param iso3: iso3 du pays dont vous voulez savoir les jours fériés
         :type iso3: str

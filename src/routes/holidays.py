@@ -35,6 +35,18 @@ def holidays_coucou():
 @swag_from({
     "tags": ["Holidays"],
     "description": "Route qui renvoi le nombre de jours fériés par pays en JSON",
+    "parameters": [
+        {
+            "name": "holiday-type",
+            "in": "query",
+            "type": "string",
+            "required": False,
+            "description": 
+                "Type de jour férié à filtrer. Types valides : "
+                "Public holiday, Observance, Local holiday, Local observance, Special holiday.",
+            "example": "Public holiday"
+        }
+    ],
     "responses": {
         200: {
             "description": "Nombre de jours fériés par pays",
