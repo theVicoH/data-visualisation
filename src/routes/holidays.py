@@ -1,35 +1,9 @@
-from http import HTTPStatus
-from flask import Blueprint, jsonify
+from flask import Blueprint
 from flasgger import swag_from
 from src.services.holidays import HolidaysService
 
 holidays_bp = Blueprint('holidays_bp', __name__, url_prefix='/holidays')
 holidays_service = HolidaysService()
-
-@holidays_bp.route('/coucou', methods=['GET'])
-@swag_from({
-    "tags": ["Holidays coucou"],
-    "description": "Route coucou qui renvoi un message coucou holidays en JSON",
-    "responses": {
-        200: {
-            "description": "Coucou holidays de bienvenue",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "message": {
-                        "type": "string",
-                        "example": "Coucou holidays !"
-                    }
-                }
-            }
-        }
-    }
-})
-def holidays_coucou():
-    """
-    Fonction qui renvoi un message Coucou holidays ! en JSON
-    """
-    return jsonify({ 'message': 'Coucou holidays !' }), HTTPStatus.OK
 
 @holidays_bp.get('/holidays-by-country')
 @swag_from({
@@ -288,3 +262,87 @@ def get_holiday_repartition_by_type():
     fériés par type
     """
     return holidays_service.get_holidays_repartition_by_type()
+
+@holidays_bp.get('/year')
+@swag_from({
+    "tags": ["Holidays"],
+    "description": "Route qui renvoi le nombre des jours "
+    "fériés par an",
+    "parameters": [
+        {
+            "name": "country",
+            "in": "query",
+            "type": "string",
+            "required": False,
+            "description": "Pays",
+            "example": "Serbia"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Nombre de jours fériés par an",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "2010": {
+                        "type": "number",
+                        "example": 4296
+                    },
+                    "2011": {
+                        "type": "number",
+                        "example": 4355
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_holidays_by_year():
+    """
+    Fonction qui renvoi le nombre de jours
+    fériés par an
+    """
+    return holidays_service.get_holidays_by_year()
+
+@holidays_bp.get('/month')
+@swag_from({
+    "tags": ["Holidays"],
+    "description": "Route qui renvoi le nombre des jours "
+    "fériés par mois",
+    "parameters": [
+        {
+            "name": "country",
+            "in": "query",
+            "type": "string",
+            "required": False,
+            "description": "Pays",
+            "example": "Serbia"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Nombre de jours fériés par mois",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "2010-01": {
+                        "type": "number",
+                        "example": 317
+                    },
+                    "2010-02": {
+                        "type": "number",
+                        "example": 2
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_holidays_by_month():
+    """
+    Fonction qui renvoi le nombre de jours
+    fériés par mois
+    """
+    return holidays_service.get_holidays_by_month()
