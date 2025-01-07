@@ -146,3 +146,78 @@ def get_holiday_for_one_country(iso3):
     Retourne le nombre de jours fériés pour un pays spécifique
     """
     return holidays_service.get_holidays_for_one_country(iso3)
+
+@holidays_bp.get('/min-max')
+@swag_from({
+    "tags": ["Holidays"],
+    "description": "Route qui renvoi le pays avec le moins de jours fériés et "
+    "le pays avec le plus de jours fériés en JSON",
+    "parameters": [
+        {
+            "name": "holiday-type",
+            "in": "query",
+            "type": "string",
+            "required": False,
+            "description": 
+                "Type de jour férié à filtrer. Types valides : "
+                "Public holiday, Observance, Local holiday, Local observance, Special holiday.",
+            "example": "Public holiday"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Pays avec les jours fériés minimum et maximum",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "max": {
+                        "type": "object",
+                        "properties": {
+                            "country": {
+                                "type": "string",
+                                "example": "Us"
+                            },
+                            "data": {
+                                "type": "number",
+                                "example": 1079
+                            }
+                        }
+                    },
+                    "min": {
+                        "type": "object",
+                        "properties": {
+                            "country": {
+                                "type": "string",
+                                "example": "Mayotte"
+                            },
+                            "data": {
+                                "type": "number",
+                                "example": 40
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        400: {
+            "description": "Erreur liée à la requête, comme un "
+            "un type de jour férié non valide.",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "holiday-type non valide"
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_holiday_min_max():
+    """
+    Fonction qui renvoi le pays avec le moins de jours fériés et
+    le pays avec le plus de jours fériés
+    """
+    return holidays_service.get_min_max_holidays()

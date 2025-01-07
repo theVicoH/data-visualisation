@@ -91,3 +91,52 @@ class HolidaysService:
 
         except ImportError as error:
             return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def get_min_max_holidays(self):
+        """
+        Retourne le pays avec le moins de jours fériés et
+        le pays avec le plus de jours fériés
+        """
+        try:
+            valid_holiday_types = [
+                "Public holiday",
+                "Observance",
+                "Local holiday",
+                "Local observance",
+                "Special holiday"
+            ]
+            df = pd.read_csv(self.file_path)
+
+            holiday_type = request.args.get('holiday-type')
+
+            if holiday_type:
+                if holiday_type not in valid_holiday_types:
+                    return jsonify({
+                        "error": "holiday-type non valide"
+                    }), HTTPStatus.BAD_REQUEST
+
+                df = df[df['Type'] == holiday_type]
+
+            holiday_counts = df.groupby('ADM_name').size()
+
+            min_holidays_country = holiday_counts.idxmin()
+
+            min_holidays_data = df[df['ADM_name'] == min_holidays_country]
+
+            max_holidays_country = holiday_counts.idxmax()
+
+            max_holidays_data = df[df['ADM_name'] == max_holidays_country]
+
+            return jsonify({
+                "min": {
+                    "country": min_holidays_country,
+                    "data": len(min_holidays_data[['Date', 'Name']].to_dict(orient='records'))
+                },
+                "max": {
+                    "country": max_holidays_country,
+                    "data": len(max_holidays_data[['Date', 'Name']].to_dict(orient='records'))
+                }
+            }), HTTPStatus.OK
+
+        except ImportError as error:
+            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
