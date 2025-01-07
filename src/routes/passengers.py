@@ -422,3 +422,70 @@ def get_totals_by_date_range():
         status = HTTPStatus.INTERNAL_SERVER_ERROR
 
     return jsonify(response), status
+
+@passengers_bp.get("/country/<iso3>")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": "Retourne les données mensuelles pour un pays spécifique",
+    "parameters": [
+        {
+            "name": "iso3",
+            "in": "path",
+            "type": "string",
+            "required": True,
+            "description": "Code ISO3 du pays",
+            "example": "FRA"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Données mensuelles du pays",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "country": {
+                        "type": "string",
+                        "example": "FRA"
+                    },
+                    "monthly_data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "year": {"type": "integer", "example": 2019},
+                                "month": {"type": "integer", "example": 1},
+                                "domestic": {"type": "number", "example": 800000},
+                                "international": {"type": "number", "example": 1500000},
+                                "total": {"type": "number", "example": 2300000}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        400: {"description": "Code pays invalide"},
+        500: {"description": "Erreur lors du traitement des données"}
+    }
+})
+def get_country_monthly_data(iso3):
+    """
+    Retourne les données mensuelles pour un pays spécifique
+    """
+    try:
+        monthly_data = passengers_service.get_monthly_data_by_country(iso3)
+
+        if monthly_data is None:
+            return jsonify({
+                "error": "Code pays invalide"
+            }), HTTPStatus.BAD_REQUEST
+
+        return jsonify({
+            "country": iso3.upper(),
+            "monthly_data": monthly_data
+        }), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
