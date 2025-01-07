@@ -8,7 +8,7 @@ passengers_bp = Blueprint('passengers_bp', __name__, url_prefix='/passengers')
 passengers_service = PassengersService()
 date_util = DateUtils()
 
-@passengers_bp.get("/total-by-country")
+@passengers_bp.get("/totals/total/country")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne le volume total de passagers par pays",
@@ -44,7 +44,7 @@ def get_total_number_of_passengers_by_country():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/domestic-total")
+@passengers_bp.get("/totals/domestic/country")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne le volume total de passagers domestiques par pays",
@@ -80,7 +80,7 @@ def get_total_number_of_domestic_passengers_by_country():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/international-total")
+@passengers_bp.get("/totals/international/country")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne le volume total de passagers internationaux par pays",
@@ -116,7 +116,7 @@ def get_total_number_of_international_passengers_by_country():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/country/<iso3>")
+@passengers_bp.get("/totals/country/<iso3>")
 @swag_from({
     "tags": ["Passengers"],
     "description": 
@@ -148,6 +148,10 @@ def get_total_number_of_international_passengers_by_country():
                     "international_total": {
                         "type": "number",
                         "example": 1500000
+                    },
+                    "total": {
+                        "type": "number",
+                        "example": 2300000
                     }
                 }
             }
@@ -174,7 +178,7 @@ def get_all_totals_passenger_by_country(iso3):
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/world-total")
+@passengers_bp.get("/totals/world")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne le volume total mondial de passagers",
@@ -207,7 +211,7 @@ def get_world_total():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/date")
+@passengers_bp.get("/date/totals")
 @swag_from({
     "tags": ["Passengers"],
     "description": 
@@ -296,7 +300,7 @@ def get_totals_by_date():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/date-range")
+@passengers_bp.get("/date/range/totals")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne les totaux de passagers sur une période donnée",
@@ -418,3 +422,147 @@ def get_totals_by_date_range():
         status = HTTPStatus.INTERNAL_SERVER_ERROR
 
     return jsonify(response), status
+
+@passengers_bp.get("/country/<iso3>")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": "Retourne les données mensuelles pour un pays spécifique",
+    "parameters": [
+        {
+            "name": "iso3",
+            "in": "path",
+            "type": "string",
+            "required": True,
+            "description": "Code ISO3 du pays",
+            "example": "FRA"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Données mensuelles du pays",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "country": {
+                        "type": "string",
+                        "example": "FRA"
+                    },
+                    "monthly_data": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "year": {"type": "integer", "example": 2019},
+                                "month": {"type": "integer", "example": 1},
+                                "domestic": {"type": "number", "example": 800000},
+                                "international": {"type": "number", "example": 1500000},
+                                "total": {"type": "number", "example": 2300000}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        400: {"description": "Code pays invalide"},
+        500: {"description": "Erreur lors du traitement des données"}
+    }
+})
+def get_country_monthly_data(iso3):
+    """
+    Retourne les données mensuelles pour un pays spécifique
+    """
+    try:
+        monthly_data = passengers_service.get_monthly_data_by_country(iso3)
+
+        if monthly_data is None:
+            return jsonify({
+                "error": "Code pays invalide"
+            }), HTTPStatus.BAD_REQUEST
+
+        return jsonify({
+            "country": iso3.upper(),
+            "monthly_data": monthly_data
+        }), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@passengers_bp.get("/date/country")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": "Retourne les totaux par pays pour une date donnée",
+    "parameters": [
+        {
+            "name": "year",
+            "in": "query",
+            "type": "integer",
+            "required": True,
+            "description": "Année",
+            "example": 2019
+        },
+        {
+            "name": "month",
+            "in": "query",
+            "type": "integer",
+            "required": False,
+            "description": "Mois (1-12)",
+            "example": 6
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Totaux par pays pour la période",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "year": {"type": "integer", "example": 2019},
+                    "month": {"type": "integer", "example": 6},
+                    "countries": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "country": {"type": "string", "example": "FRA"},
+                                "domestic": {"type": "number", "example": 800000},
+                                "international": {"type": "number", "example": 1500000},
+                                "total": {"type": "number", "example": 2300000}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        400: {"description": "Paramètres invalides"},
+        404: {"description": "Données non trouvées"},
+        500: {"description": "Erreur lors du traitement"}
+    }
+})
+def get_totals_by_date_country():
+    """
+    Retourne les totaux par pays pour une date donnée
+    """
+    try:
+        year, error = date_util.validate_year(request.args.get('year'))
+        if error:
+            return jsonify(error[0]), error[1]
+
+        month, error = date_util.validate_month(request.args.get('month'))
+        if error:
+            return jsonify(error[0]), error[1]
+
+        result = passengers_service.get_totals_by_date_country(year, month)
+        if result is None:
+            return jsonify({
+                "error": "Données non trouvées pour la période spécifiée"
+            }), HTTPStatus.NOT_FOUND
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR

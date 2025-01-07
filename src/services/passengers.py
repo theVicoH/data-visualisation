@@ -128,3 +128,57 @@ class PassengersService:
             "total": round(self.df['Total'].fillna(0).sum() * 1000),
             "countries": self.df['ISO3'].nunique()
         }
+
+    def get_monthly_data_by_country(self, iso3):
+        """
+        Retourne les données mensuelles pour un pays spécifique
+        """
+        country_data = self.df[self.df['ISO3'] == iso3.upper()]
+        if country_data.empty:
+            return None
+
+        result = []
+        for _, row in country_data.iterrows():
+            result.append({
+                "year": int(row['Year']),
+                "month": int(row['Month']),
+                "domestic": round(
+                        row['Domestic'] * 1000) if pd.notna(row['Domestic']
+                    ) else 0,
+                "international": round(
+                        row['International'] * 1000) if pd.notna(row['International']
+                    ) else 0,
+                "total": round(row['Total'] * 1000) if pd.notna(row['Total']) else 0
+            })
+
+        return sorted(result, key=lambda x: (x['year'], x['month']))
+
+    def get_totals_by_date_country(self, year, month=None):
+        """
+        Retourne les totaux par pays pour une date donnée
+        """
+        mask = self.df['Year'] == year
+        if month is not None:
+            mask &= self.df['Month'] == month
+
+        date_data = self.df[mask]
+
+        if date_data.empty:
+            return None
+
+        result = []
+        for _, row in date_data.iterrows():
+            result.append({
+                "country": row['ISO3'],
+                "year": year,
+                "month": row['Month'],
+                "domestic": round(row['Domestic'] * 1000) if pd.notna(row['Domestic']) else 0,
+                "international": round(
+                        row['International'] * 1000) if pd.notna(row['International']
+                    ) else 0,
+                "total": round(row['Total'] * 1000) if pd.notna(row['Total']) else 0
+            })
+
+        return {
+            "countries": result
+        }
