@@ -489,3 +489,80 @@ def get_country_monthly_data(iso3):
             "error": "Erreur lors du traitement des données",
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@passengers_bp.get("/date/country")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": "Retourne les totaux par pays pour une date donnée",
+    "parameters": [
+        {
+            "name": "year",
+            "in": "query",
+            "type": "integer",
+            "required": True,
+            "description": "Année",
+            "example": 2019
+        },
+        {
+            "name": "month",
+            "in": "query",
+            "type": "integer",
+            "required": False,
+            "description": "Mois (1-12)",
+            "example": 6
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Totaux par pays pour la période",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "year": {"type": "integer", "example": 2019},
+                    "month": {"type": "integer", "example": 6},
+                    "countries": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "country": {"type": "string", "example": "FRA"},
+                                "domestic": {"type": "number", "example": 800000},
+                                "international": {"type": "number", "example": 1500000},
+                                "total": {"type": "number", "example": 2300000}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        400: {"description": "Paramètres invalides"},
+        404: {"description": "Données non trouvées"},
+        500: {"description": "Erreur lors du traitement"}
+    }
+})
+def get_totals_by_date_country():
+    """
+    Retourne les totaux par pays pour une date donnée
+    """
+    try:
+        year, error = date_util.validate_year(request.args.get('year'))
+        if error:
+            return jsonify(error[0]), error[1]
+
+        month, error = date_util.validate_month(request.args.get('month'))
+        if error:
+            return jsonify(error[0]), error[1]
+
+        result = passengers_service.get_totals_by_date_country(year, month)
+        if result is None:
+            return jsonify({
+                "error": "Données non trouvées pour la période spécifiée"
+            }), HTTPStatus.NOT_FOUND
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
