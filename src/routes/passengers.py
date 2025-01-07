@@ -174,6 +174,39 @@ def get_all_totals_passenger_by_country(iso3):
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
+@passengers_bp.get("/world-total")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": "Retourne le volume total mondial de passagers",
+    "responses": {
+        200: {
+            "description": "Totaux mondiaux",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "domestic_total": {"type": "number", "example": 800000000},
+                    "international_total": {"type": "number", "example": 1500000000},
+                    "total": {"type": "number", "example": 2300000000},
+                    "countries": {"type": "integer", "example": 192}
+                }
+            }
+        },
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_world_total():
+    """
+    Retourne les totaux de passagers mondiaux
+    """
+    try:
+        result = passengers_service.get_world_totals()
+        return jsonify(result), HTTPStatus.OK
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
+
 @passengers_bp.get("/date")
 @swag_from({
     "tags": ["Passengers"],
