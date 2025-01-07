@@ -179,7 +179,7 @@ class HolidaysService:
 
         except ImportError as error:
             return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
-    
+
     def get_holidays_by_year(self):
         """
         Fonction qui renvoi le nombre de jours
