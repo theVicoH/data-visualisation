@@ -46,28 +46,39 @@ class PassengersService:
             "total": total_totals.get(iso3, 0)
         }
 
-    def get_totals_by_year(self, year):
+    def get_totals_by_date(self, year, month=None):
         """
-        Retourne les totaux de passagers domestiques et internationaux pour une année donnée
+        Retourne les totaux de passagers domestiques et internationaux pour une année 
+        et optionnellement un mois spécifique
         """
         year_data = self.df[self.df['Year'] == year]
 
         if year_data.empty:
             return None
 
-        domestic_total = (
-                year_data['Domestic'].sum() * 1000
-            ) if not year_data['Domestic'].empty else 0
-        international_total = (
-                year_data['International'].sum() * 1000
-            ) if not year_data['International'].empty else 0
-        total = (
-                year_data['Total'].sum() * 1000
-            ) if not year_data['Total'].empty else 0
+        if month is not None:
+            year_data = year_data[year_data['Month'] == month]
+            if year_data.empty:
+                return None
 
-        return {
+        domestic_total = round(
+            year_data['Domestic'].sum() * 1000
+        ) if not year_data['Domestic'].empty else 0
+        international_total = round(
+            year_data['International'].sum() * 1000
+        ) if not year_data['International'].empty else 0
+        total = round(
+            year_data['Total'].sum() * 1000
+        ) if not year_data['Total'].empty else 0
+
+        result = {
             "year": year,
             "domestic_total": domestic_total,
             "international_total": international_total,
             "total": total
         }
+
+        if month is not None:
+            result["month"] = month
+
+        return result

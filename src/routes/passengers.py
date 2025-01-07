@@ -1,10 +1,12 @@
 from http import HTTPStatus
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flasgger import swag_from
 from src.services.passengers import PassengersService
+from src.utils.date import DateUtils
 
 passengers_bp = Blueprint('passengers_bp', __name__, url_prefix='/passengers')
-service = PassengersService()
+passengers_service = PassengersService()
+date_util = DateUtils()
 
 @passengers_bp.get("/total-by-country")
 @swag_from({
@@ -32,7 +34,7 @@ def get_total_number_of_passengers_by_country():
     Fonction qui renvoi le total de passagers de tous les pays en JSON
     """
     try:
-        country_totals = service.get_totals_group_by_country('Total')
+        country_totals = passengers_service.get_totals_group_by_country('Total')
         return jsonify({
             "country_totals": country_totals
         }), HTTPStatus.OK
@@ -68,7 +70,7 @@ def get_total_number_of_domestic_passengers_by_country():
     Fonction qui renvoi le total de passagers domestiques par pays en JSON
     """
     try:
-        domestic_totals = service.get_totals_group_by_country('Domestic')
+        domestic_totals = passengers_service.get_totals_group_by_country('Domestic')
         return jsonify({
             "domestic_totals": domestic_totals
         }), HTTPStatus.OK
@@ -104,7 +106,7 @@ def get_total_number_of_international_passengers_by_country():
     Fonction qui renvoi le total de passagers internationaux par pays en JSON
     """
     try:
-        international_totals = service.get_totals_group_by_country('International')
+        international_totals = passengers_service.get_totals_group_by_country('International')
         return jsonify({
             "international_totals": international_totals
         }), HTTPStatus.OK
@@ -159,7 +161,7 @@ def get_all_totals_passenger_by_country(iso3):
     Retourne les totaux de passagers pour un pays spécifique
     """
     try:
-        result = service.get_all_totals_by_country(iso3)
+        result = passengers_service.get_all_totals_by_country(iso3)
 
         if isinstance(result, tuple):
             return jsonify(result[0]), result[1]
@@ -172,30 +174,47 @@ def get_all_totals_passenger_by_country(iso3):
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/year/<int:year>")
+@passengers_bp.get("/date")
 @swag_from({
     "tags": ["Passengers"],
     "description": 
-      "Retourne le volume total de passagers domestiques et internationaux pour une année donnée",
+      """
+        Retourne le volume total de passagers domestiques
+        et internationaux pour une année et optionnellement
+        un mois spécifique
+      """,
     "parameters": [
         {
             "name": "year",
-            "in": "path",
+            "in": "query",
             "type": "integer",
             "required": True,
             "description": "Année pour laquelle obtenir les statistiques",
             "example": 2019
+        },
+        {
+            "name": "month",
+            "in": "query",
+            "type": "integer",
+            "required": False,
+            "description": "Mois pour lequel obtenir les statistiques (1-12)",
+            "example": 6
         }
     ],
     "responses": {
         200: {
-            "description": "Totaux des passagers pour l'année",
+            "description": "Totaux des passagers pour la période",
             "schema": {
                 "type": "object",
                 "properties": {
                     "year": {
                         "type": "integer",
                         "example": 2019
+                    },
+                    "month": {
+                        "type": "integer",
+                        "example": 6,
+                        "description": "Present uniquement si un mois est spécifié"
                     },
                     "domestic_total": {
                         "type": "number",
@@ -212,20 +231,28 @@ def get_all_totals_passenger_by_country(iso3):
                 }
             }
         },
-        404: {"description": "Année non trouvée"},
+        400: {"description": "Paramètres invalides"},
+        404: {"description": "Données non trouvées pour la période spécifiée"},
         500: {"description": "Erreur lors de la lecture du fichier"}
     }
 })
-def get_totals_by_year(year):
+def get_totals_by_date():
     """
-    Retourne les totaux de passagers pour une année spécifique
+    Retourne les totaux de passagers domestiques et internationaux pour une année
     """
     try:
-        result = service.get_totals_by_year(year)
+        year, error = date_util.validate_year(request.args.get('year'))
+        if error:
+            return jsonify(error[0]), error[1]
 
+        month, error = date_util.validate_month(request.args.get('month'))
+        if error:
+            return jsonify(error[0]), error[1]
+
+        result = passengers_service.get_totals_by_date(year, month)
         if result is None:
             return jsonify({
-                "error": "Année non trouvée"
+                "error": "Données non trouvées pour la période spécifiée"
             }), HTTPStatus.NOT_FOUND
 
         return jsonify(result), HTTPStatus.OK
