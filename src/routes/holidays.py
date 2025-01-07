@@ -57,3 +57,45 @@ def get_holidays_by_country():
     Fonction qui renvoi le nombre de jours fériés par pays en JSON
     """
     return holidays_service.get_holidays_by_country()
+
+@holidays_bp.get("/holidays-by-country/<iso3>")
+@swag_from({
+    "tags": ["Holidays"],
+    "description": 
+      "Retourne le nombre de jours fériés pour un pays spécifique",
+    "parameters": [
+        {
+            "name": "iso3",
+            "in": "path",
+            "type": "string",
+            "required": True,
+            "description": "Code ISO3 du pays",
+            "example": "FRA"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Nombre de jours fériés pour le pays",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "country": {
+                        "type": "string",
+                        "example": "FRA"
+                    },
+                    "data": {
+                        "type": "number",
+                        "example": 190
+                    },
+                }
+            }
+        },
+        400: {"description": "iso3 non valide"},
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_holiday_for_one_country(iso3):
+    """
+    Retourne le nombre de jours fériés pour un pays spécifique
+    """
+    return holidays_service.get_holidays_for_one_country(iso3)

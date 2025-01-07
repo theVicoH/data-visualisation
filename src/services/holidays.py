@@ -26,8 +26,28 @@ class HolidaysService:
         except ImportError as error:
             return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
 
-    def double_holidays(self):
+    def get_holidays_for_one_country(self, iso3):
         """
-        Retourne un double coucou holidays
+        Retourne le nombre de jours fériés ppur un seul pays
+
+        :param iso3: iso3 du pays dont vous voulez savoir les jours fériés
+        :type iso3: str
         """
-        return jsonify("double coucou"), HTTPStatus.OK
+        try:
+            df = pd.read_csv(self.file_path)
+            filtered_df = df[df['ISO3'] == iso3.upper()]
+
+            if filtered_df.empty:
+                return jsonify({
+                    "error": "iso3 non valide"
+                }), HTTPStatus.BAD_REQUEST
+
+            holiday_count = len(filtered_df)
+
+            return jsonify({
+                "country": iso3,
+                "data": holiday_count
+            }), HTTPStatus.OK
+
+        except ImportError as error:
+            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
