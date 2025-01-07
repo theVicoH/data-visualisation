@@ -171,3 +171,67 @@ def get_all_totals_passenger_by_country(iso3):
             "error": "Erreur lors du traitement des données",
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@passengers_bp.get("/year/<int:year>")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": 
+      "Retourne le volume total de passagers domestiques et internationaux pour une année donnée",
+    "parameters": [
+        {
+            "name": "year",
+            "in": "path",
+            "type": "integer",
+            "required": True,
+            "description": "Année pour laquelle obtenir les statistiques",
+            "example": 2019
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Totaux des passagers pour l'année",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "year": {
+                        "type": "integer",
+                        "example": 2019
+                    },
+                    "domestic_total": {
+                        "type": "number",
+                        "example": 800000000
+                    },
+                    "international_total": {
+                        "type": "number",
+                        "example": 1500000000
+                    },
+                    "total": {
+                        "type": "number",
+                        "example": 2300000000
+                    }
+                }
+            }
+        },
+        404: {"description": "Année non trouvée"},
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_totals_by_year(year):
+    """
+    Retourne les totaux de passagers pour une année spécifique
+    """
+    try:
+        result = service.get_totals_by_year(year)
+
+        if result is None:
+            return jsonify({
+                "error": "Année non trouvée"
+            }), HTTPStatus.NOT_FOUND
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR

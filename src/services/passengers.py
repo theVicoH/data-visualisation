@@ -45,3 +45,29 @@ class PassengersService:
             "international_total": international_totals.get(iso3, 0),
             "total": total_totals.get(iso3, 0)
         }
+
+    def get_totals_by_year(self, year):
+        """
+        Retourne les totaux de passagers domestiques et internationaux pour une année donnée
+        """
+        year_data = self.df[self.df['Year'] == year]
+
+        if year_data.empty:
+            return None
+
+        domestic_total = (
+                year_data['Domestic'].sum() * 1000
+            ) if not year_data['Domestic'].empty else 0
+        international_total = (
+                year_data['International'].sum() * 1000
+            ) if not year_data['International'].empty else 0
+        total = (
+                year_data['Total'].sum() * 1000
+            ) if not year_data['Total'].empty else 0
+
+        return {
+            "year": year,
+            "domestic_total": domestic_total,
+            "international_total": international_total,
+            "total": total
+        }
