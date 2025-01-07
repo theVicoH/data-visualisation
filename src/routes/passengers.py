@@ -31,7 +31,16 @@ def get_total_number_of_passengers_by_country():
     """
     Fonction qui renvoi le total de passagers de tous les pays en JSON
     """
-    return service.get_total_by_country()
+    try:
+        country_totals = service.get_total_by_country()
+        return jsonify({
+            "country_totals": country_totals
+        }), HTTPStatus.OK
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors de la lecture du fichier",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
 
 @passengers_bp.get("/domestic-total")
 @swag_from({

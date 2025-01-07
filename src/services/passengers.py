@@ -1,7 +1,6 @@
 import os
 from http import HTTPStatus
 import pandas as pd
-from flask import jsonify
 
 class PassengersService:
     """
@@ -21,14 +20,9 @@ class PassengersService:
         try:
             df = pd.read_csv(self.file_path)
             totals = (df[df['Total'].notna()]['Total'] * 1000).groupby(df['ISO3']).sum()
-            return jsonify({
-                "country_totals": totals.to_dict()
-            }), HTTPStatus.OK
+            return totals.to_dict()
         except ImportError as error:
-            return jsonify({
-                "error": "Erreur lors de la lecture du fichier",
-                "details": str(error)
-            }), HTTPStatus.INTERNAL_SERVER_ERROR
+            raise ImportError(f"Erreur lors de la lecture du fichier: {str(error)}")
 
     def get_domestic_total(self):
         """
@@ -74,7 +68,7 @@ class PassengersService:
 
             if country_data.empty:
                 return jsonify({
-                    "error": "Pays non trouvé"
+                    "error": "Entrez un iso3 valide"
                 }), HTTPStatus.BAD_REQUEST
 
             domestic_total = (
