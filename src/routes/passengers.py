@@ -211,7 +211,7 @@ def get_world_total():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/date")
+@passengers_bp.get("/date-totals")
 @swag_from({
     "tags": ["Passengers"],
     "description": 
@@ -300,7 +300,7 @@ def get_totals_by_date():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/date-range")
+@passengers_bp.get("/date-range-totals")
 @swag_from({
     "tags": ["Passengers"],
     "description": "Retourne les totaux de passagers sur une période donnée",
