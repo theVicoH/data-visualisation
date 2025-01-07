@@ -115,3 +115,16 @@ class PassengersService:
             "total": round(date_range_data['Total'].fillna(0).sum() * 1000),
             "countries": date_range_data['ISO3'].nunique()
         }
+    def get_world_totals(self):
+        """
+        Retourne les totaux mondiaux
+        """
+        for col in ['Domestic', 'International', 'Total']:
+            self.df[col] = pd.to_numeric(self.df[col], errors='coerce')
+
+        return {
+            "domestic_total": round(self.df['Domestic'].fillna(0).sum() * 1000),
+            "international_total": round(self.df['International'].fillna(0).sum() * 1000),
+            "total": round(self.df['Total'].fillna(0).sum() * 1000),
+            "countries": self.df['ISO3'].nunique()
+        }
