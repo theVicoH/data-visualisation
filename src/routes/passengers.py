@@ -116,7 +116,7 @@ def get_total_number_of_international_passengers_by_country():
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
-@passengers_bp.get("/country/<iso3>")
+@passengers_bp.get("/totals-country/<iso3>")
 @swag_from({
     "tags": ["Passengers"],
     "description": 
@@ -148,6 +148,10 @@ def get_total_number_of_international_passengers_by_country():
                     "international_total": {
                         "type": "number",
                         "example": 1500000
+                    },
+                    "total": {
+                        "type": "number",
+                        "example": 2300000
                     }
                 }
             }
