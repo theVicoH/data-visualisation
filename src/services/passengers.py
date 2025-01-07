@@ -82,3 +82,36 @@ class PassengersService:
             result["month"] = month
 
         return result
+
+    def get_totals_by_date_range(self, start_year, start_month, end_year, end_month):
+        """
+        Retourne les totaux entre deux dates
+        """
+
+        for col in ['Domestic', 'International', 'Total']:
+            self.df[col] = pd.to_numeric(self.df[col], errors='coerce')
+
+        mask = (
+            ((self.df['Year'] > start_year) |
+             ((self.df['Year'] == start_year) &
+              (self.df['Month'] >= start_month))) &
+            ((self.df['Year'] < end_year) |
+             ((self.df['Year'] == end_year) &
+              (self.df['Month'] <= end_month)))
+        )
+
+        date_range_data = self.df[mask]
+
+        if date_range_data.empty:
+            return None
+
+        return {
+            "period": {
+                "start": {"year": start_year, "month": start_month},
+                "end": {"year": end_year, "month": end_month}
+            },
+            "domestic_total": round(date_range_data['Domestic'].fillna(0).sum() * 1000),
+            "international_total": round(date_range_data['International'].fillna(0).sum() * 1000),
+            "total": round(date_range_data['Total'].fillna(0).sum() * 1000),
+            "countries": date_range_data['ISO3'].nunique()
+        }

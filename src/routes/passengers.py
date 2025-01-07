@@ -262,3 +262,126 @@ def get_totals_by_date():
             "error": "Erreur lors du traitement des données",
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@passengers_bp.get("/date-range")
+@swag_from({
+    "tags": ["Passengers"],
+    "description": "Retourne les totaux de passagers sur une période donnée",
+    "parameters": [
+        {
+            "name": "start_year",
+            "in": "query",
+            "type": "integer",
+            "required": True,
+            "description": "Année de début",
+            "example": 2019
+        },
+        {
+            "name": "start_month",
+            "in": "query",
+            "type": "integer",
+            "required": True,
+            "description": "Mois de début (1-12)",
+            "example": 1
+        },
+        {
+            "name": "end_year",
+            "in": "query",
+            "type": "integer",
+            "required": True,
+            "description": "Année de fin",
+            "example": 2019
+        },
+        {
+            "name": "end_month",
+            "in": "query",
+            "type": "integer",
+            "required": True,
+            "description": "Mois de fin (1-12)",
+            "example": 12
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Totaux des passagers pour la période",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "period": {
+                        "type": "object",
+                        "properties": {
+                            "start": {
+                                "type": "object",
+                                "properties": {
+                                    "year": {"type": "integer", "example": 2019},
+                                    "month": {"type": "integer", "example": 1}
+                                }
+                            },
+                            "end": {
+                                "type": "object",
+                                "properties": {
+                                    "year": {"type": "integer", "example": 2019},
+                                    "month": {"type": "integer", "example": 12}
+                                }
+                            }
+                        }
+                    },
+                    "domestic_total": {"type": "number", "example": 800000000},
+                    "international_total": {"type": "number", "example": 1500000000},
+                    "total": {"type": "number", "example": 2300000000},
+                    "countries": {"type": "integer", "example": 192}
+                }
+            }
+        },
+        400: {"description": "Paramètres invalides"},
+        404: {"description": "Données non trouvées pour la période spécifiée"},
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_totals_by_date_range():
+    """
+    Retourne les totaux de passagers sur une période donnée
+    """
+    try:
+        response = None
+        status = HTTPStatus.OK
+
+        params = {
+            'start_year': date_util.validate_year(request.args.get('start_year')),
+            'start_month': date_util.validate_month(request.args.get('start_month')),
+            'end_year': date_util.validate_year(request.args.get('end_year')),
+            'end_month': date_util.validate_month(request.args.get('end_month'))
+        }
+
+        for param_result in params.values():
+            if param_result[1]:
+                response = param_result[1][0]
+                status = param_result[1][1]
+                break
+
+        if not response:
+            start_year, start_month = params['start_year'][0], params['start_month'][0]
+            end_year, end_month = params['end_year'][0], params['end_month'][0]
+
+            if (start_year > end_year) or (start_year == end_year and start_month > end_month):
+                response = {"error": "La date de début doit être antérieure à la date de fin"}
+                status = HTTPStatus.BAD_REQUEST
+            else:
+                result = passengers_service.get_totals_by_date_range(
+                    start_year, start_month, end_year, end_month
+                )
+
+                if result is None:
+                    response = {"error": "Données non trouvées pour la période spécifiée"}
+                    status = HTTPStatus.NOT_FOUND
+                else:
+                    response = result
+
+    except ImportError as error:
+        response = {
+            "error": "Erreur lors du traitement des données",
+            "details": str(error)
+        }
+        status = HTTPStatus.INTERNAL_SERVER_ERROR
+
+    return jsonify(response), status
