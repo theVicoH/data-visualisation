@@ -268,6 +268,16 @@ def get_holiday_repartition_by_type():
     "tags": ["Holidays"],
     "description": "Route qui renvoi le nombre des jours "
     "fériés par an",
+    "parameters": [
+        {
+            "name": "country",
+            "in": "query",
+            "type": "string",
+            "required": False,
+            "description": "Pays",
+            "example": "Serbia"
+        }
+    ],
     "responses": {
         200: {
             "description": "Nombre de jours fériés par an",
@@ -294,3 +304,45 @@ def get_holidays_by_year():
     fériés par an
     """
     return holidays_service.get_holidays_by_year()
+
+@holidays_bp.get('/month')
+@swag_from({
+    "tags": ["Holidays"],
+    "description": "Route qui renvoi le nombre des jours "
+    "fériés par mois",
+    "parameters": [
+        {
+            "name": "country",
+            "in": "query",
+            "type": "string",
+            "required": False,
+            "description": "Pays",
+            "example": "Serbia"
+        }
+    ],
+    "responses": {
+        200: {
+            "description": "Nombre de jours fériés par mois",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "2010-01": {
+                        "type": "number",
+                        "example": 317
+                    },
+                    "2010-02": {
+                        "type": "number",
+                        "example": 2
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors de la lecture du fichier"}
+    }
+})
+def get_holidays_by_month():
+    """
+    Fonction qui renvoi le nombre de jours
+    fériés par mois
+    """
+    return holidays_service.get_holidays_by_month()

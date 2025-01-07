@@ -189,6 +189,16 @@ class HolidaysService:
         try:
             df = pd.read_csv(self.file_path)
 
+            country = request.args.get('country')
+
+            if country:
+                if country.capitalize() not in df['ADM_name'].values:
+                    return jsonify({
+                        "error": "country non valide"
+                    }), HTTPStatus.BAD_REQUEST
+
+                df = df[df['ADM_name'] == country.capitalize()]
+
             df['Date'] = pd.to_datetime(df['Date'])
 
             df['Year'] = df['Date'].dt.year
@@ -196,6 +206,38 @@ class HolidaysService:
             holiday_count_per_year = df.groupby('Year').size()
 
             return jsonify(holiday_count_per_year.to_dict()), HTTPStatus.OK
+
+        except ImportError as error:
+            return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def get_holidays_by_month(self):
+        """
+        Fonction qui renvoi le nombre de jours
+        fériés par mois
+        """
+
+        try:
+            df = pd.read_csv(self.file_path)
+
+            country = request.args.get('country')
+
+            if country:
+                if country.capitalize() not in df['ADM_name'].values:
+                    return jsonify({
+                        "error": "country non valide"
+                    }), HTTPStatus.BAD_REQUEST
+
+                df = df[df['ADM_name'] == country.capitalize()]
+
+            df['Date'] = pd.to_datetime(df['Date'])
+
+            df['YearMonth'] = df['Date'].dt.to_period('M').astype(str)
+
+            holiday_count_per_month = df.groupby('YearMonth').size().to_dict()
+
+            return jsonify(
+                holiday_count_per_month
+            ), HTTPStatus.OK
 
         except ImportError as error:
             return jsonify({"error": error}), HTTPStatus.INTERNAL_SERVER_ERROR
