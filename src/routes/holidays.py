@@ -1,6 +1,7 @@
-from flask import Blueprint
+from http import HTTPStatus
+from flask import Blueprint, request, jsonify
 from flasgger import swag_from
-from src.services.holidays import HolidaysService
+from src.services.holidays import HolidaysService, HOLIDAY_TYPES
 
 holidays_bp = Blueprint('holidays_bp', __name__, url_prefix='/holidays')
 holidays_service = HolidaysService()
@@ -35,14 +36,33 @@ holidays_service = HolidaysService()
                 }
             }
         },
-        500: {"description": "Erreur lors de la lecture du fichier"}
+        500: {"description": "Erreur lors du traitement des données de globals_holidays.csv "}
     }
 })
 def get_holidays_by_country():
     """
     Fonction qui renvoi le nombre de jours fériés par pays en JSON
     """
-    return holidays_service.get_holidays_by_country()
+
+    try:
+        holiday_type = request.args.get('holiday-type', None)
+
+        if holiday_type and holiday_type not in HOLIDAY_TYPES:
+            return jsonify(
+                {
+                    "error": "holiday-type non valide"
+                }
+            ), HTTPStatus.BAD_REQUEST
+
+        result = holidays_service.get_holidays_by_country(holiday_type=holiday_type)
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données de globals_holidays.csv ",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
 
 @holidays_bp.get("/holidays-by-country/<iso3>")
 @swag_from({
@@ -108,7 +128,7 @@ def get_holidays_by_country():
                 "properties": {
                     "error": {
                         "type": "string",
-                        "example": "Erreur lors de la lecture du fichier"
+                        "example": "Erreur lors du traitement des données de globals_holidays.csv "
                     }
                 }
             }
@@ -119,7 +139,34 @@ def get_holiday_for_one_country(iso3):
     """
     Retourne le nombre de jours fériés pour un pays spécifique
     """
-    return holidays_service.get_holidays_for_one_country(iso3)
+    try:
+        holiday_type = request.args.get('holiday-type', None)
+
+        if holiday_type and holiday_type not in HOLIDAY_TYPES:
+            return jsonify(
+                {
+                    "error": "holiday-type non valide"
+                }
+            ), HTTPStatus.BAD_REQUEST
+
+        result = holidays_service.get_holidays_for_one_country(
+            iso3=iso3,
+            holiday_type=holiday_type
+        )
+
+        if not result:
+            return jsonify({
+                "error": "iso3 non valide"
+            }), HTTPStatus.BAD_REQUEST
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données de globals_holidays.csv ",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
+
 
 @holidays_bp.get('/min-max')
 @swag_from({
@@ -186,7 +233,7 @@ def get_holiday_for_one_country(iso3):
                 }
             }
         },
-        500: {"description": "Erreur lors de la lecture du fichier"}
+        500: {"description": "Erreur lors du traitement des données de globals_holidays.csv"}
     }
 })
 def get_holiday_min_max():
@@ -194,7 +241,25 @@ def get_holiday_min_max():
     Fonction qui renvoi le pays avec le moins de jours fériés et
     le pays avec le plus de jours fériés
     """
-    return holidays_service.get_min_max_holidays()
+    try:
+        holiday_type = request.args.get('holiday-type', None)
+
+        if holiday_type and holiday_type not in HOLIDAY_TYPES:
+            return jsonify(
+                {
+                    "error": "holiday-type non valide"
+                }
+            ), HTTPStatus.BAD_REQUEST
+
+        result = holidays_service.get_min_max_holidays(holiday_type=holiday_type)
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données de globals_holidays.csv ",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
 
 @holidays_bp.get('/repartition-by-type')
 @swag_from({
@@ -253,7 +318,7 @@ def get_holiday_min_max():
                 }
             }
         },
-        500: {"description": "Erreur lors de la lecture du fichier"}
+        500: {"description": "Erreur lors du traitement des données de globals_holidays.csv"}
     }
 })
 def get_holiday_repartition_by_type():
@@ -261,7 +326,23 @@ def get_holiday_repartition_by_type():
     Fonction qui renvoi le nombre des jours
     fériés par type
     """
-    return holidays_service.get_holidays_repartition_by_type()
+    try:
+        country = request.args.get('country', None)
+
+        result = holidays_service.get_holidays_repartition_by_type(country=country)
+
+        if result == {}:
+            return jsonify({
+                "error": "country non valide"
+            }), HTTPStatus.BAD_REQUEST
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données de globals_holidays.csv ",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
 
 @holidays_bp.get('/year')
 @swag_from({
@@ -295,7 +376,7 @@ def get_holiday_repartition_by_type():
                 }
             }
         },
-        500: {"description": "Erreur lors de la lecture du fichier"}
+        500: {"description": "Erreur lors du traitement des données de globals_holidays.csv"}
     }
 })
 def get_holidays_by_year():
@@ -303,7 +384,23 @@ def get_holidays_by_year():
     Fonction qui renvoi le nombre de jours
     fériés par an
     """
-    return holidays_service.get_holidays_by_year()
+    try:
+        country = request.args.get('country', None)
+
+        result = holidays_service.get_holidays_by_year(country=country)
+
+        if result == {}:
+            return jsonify({
+                "error": "country non valide"
+            }), HTTPStatus.BAD_REQUEST
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données de globals_holidays.csv",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
 
 @holidays_bp.get('/month')
 @swag_from({
@@ -337,7 +434,7 @@ def get_holidays_by_year():
                 }
             }
         },
-        500: {"description": "Erreur lors de la lecture du fichier"}
+        500: {"description": "Erreur lors du traitement des données de globals_holidays.csv"}
     }
 })
 def get_holidays_by_month():
@@ -345,4 +442,20 @@ def get_holidays_by_month():
     Fonction qui renvoi le nombre de jours
     fériés par mois
     """
-    return holidays_service.get_holidays_by_month()
+    try:
+        country = request.args.get('country', None)
+
+        result = holidays_service.get_holidays_by_month(country=country)
+
+        if result == {}:
+            return jsonify({
+                "error": "country non valide"
+            }), HTTPStatus.BAD_REQUEST
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données de globals_holidays.csv",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR

@@ -15,7 +15,7 @@ class PassengersService:
         try:
             self.df = pd.read_csv(self.file_path)
         except ImportError as error:
-            raise ImportError(f"Erreur lors de la lecture du fichier: {str(error)}")
+            raise ImportError(f"Erreur lors de la lecture du fichier: {str(error)}") from error
 
     def get_totals_group_by_country(self, column):
         """
