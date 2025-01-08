@@ -5,9 +5,9 @@ const sidebarStore = useSidebarStore()
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-background text-foreground ">
+    <div class="flex h-screen overflow-hidden bg-background text-foreground">
         <aside 
-            class="bg-background shrink-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 flex flex-col justify-between"
+            class="bg-background shrink-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 flex flex-col justify-between h-full"
             :class="{ 
                 'w-56': sidebarStore.isOpen, 
                 'w-[4.5rem]': !sidebarStore.isOpen 
@@ -117,7 +117,6 @@ const sidebarStore = useSidebarStore()
                 </nav>
             </div>
 
-          
             <span 
                 v-if="sidebarStore.isOpen"
                 class="block text-sm text-gray-500 dark:text-gray-400"
@@ -126,7 +125,7 @@ const sidebarStore = useSidebarStore()
             </span>
         </aside>
 
-        <main class="flex-1 overflow-hidden">
+        <main class="flex-1 overflow-y-auto">
             <slot />
         </main>
     </div>
