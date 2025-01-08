@@ -1,7 +1,7 @@
 <template>
-    <SidebarProvider>
+    <div>
         <NuxtLayout>
             <NuxtPage />
         </NuxtLayout>
-    </SidebarProvider>
+    </div>
 </template>

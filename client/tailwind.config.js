@@ -15,6 +15,9 @@ module.exports = {
       },
     },
     extend: {
+        fontFamily: {
+            sans: ['Geist', 'system-ui', 'sans-serif'],
+        },
       colors: {
         border: "var(--border)",
         input: "var(--input)",
