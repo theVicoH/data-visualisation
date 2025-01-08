@@ -5,9 +5,9 @@ const sidebarStore = useSidebarStore()
 </script>
 
 <template>
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen bg-background text-foreground ">
         <aside 
-            class="shrink-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 flex flex-col justify-between"
+            class="bg-background shrink-0 px-2 py-4 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 flex flex-col justify-between"
             :class="{ 
                 'w-56': sidebarStore.isOpen, 
                 'w-[4.5rem]': !sidebarStore.isOpen 
@@ -16,7 +16,7 @@ const sidebarStore = useSidebarStore()
             <div>
                 <div class="flex justify-between items-center" :class="{ 
                     'flex-col space-y-4 mb-3': !sidebarStore.isOpen,
-                    'mb-4': sidebarStore.isOpen
+                    'mb-2': sidebarStore.isOpen
                 }">
                     <div class="flex-1">
                         <h1
@@ -126,7 +126,7 @@ const sidebarStore = useSidebarStore()
             </span>
         </aside>
 
-        <main class="flex-1 p-4">
+        <main class="flex-1 overflow-hidden">
             <slot />
         </main>
     </div>
