@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PanelRightClose, PanelRightOpen } from 'lucide-vue-next'
+import { PanelRightClose, PanelRightOpen, House, Smile, Caravan, Plane } from 'lucide-vue-next'
 import { useSidebarStore } from '~/stores/sidebar'
 const sidebarStore = useSidebarStore()
 </script>
@@ -7,24 +7,31 @@ const sidebarStore = useSidebarStore()
 <template>
     <div class="flex min-h-screen">
         <Sidebar 
-            class="p-4 transition-all duration-300 ease-in-out" 
+            class="p-4" 
             :class="{ 
                 'w-56': sidebarStore.isOpen, 
-                'w-16': !sidebarStore.isOpen 
+                'w-18': !sidebarStore.isOpen 
             }"
-            style="transition-delay: 50ms;"
         >
-            <SideBarHeader class="flex justify-between items-center">
-                <div class="flex-1 overflow-hidden">
-                    <h1 
-                        class="text-xl font-bold transition-all duration-200 ease-in-out transform"
+            <SideBarHeader class="flex justify-between items-center" :class="{ 
+                    'flex-col space-y-4': !sidebarStore.isOpen
+                }">
+                <div class="flex-1">
+                    <h1
+                        class="text-xl font-bold whitespace-nowrap overflow-hidden text-ellipsis"
                         :class="{ 
-                            'opacity-0 -translate-x-full': !sidebarStore.isOpen, 
-                            'opacity-100 translate-x-0': sidebarStore.isOpen 
+                            'hidden': !sidebarStore.isOpen
                         }"
-                        style="transition-delay: 100ms;"
                     >
                         Mon App
+                    </h1>
+                    <h1
+                        class="text-xl font-bold whitespace-nowrap overflow-hidden text-ellipsis"
+                        :class="{ 
+                            'hidden': sidebarStore.isOpen
+                        }"
+                    >
+                        F.
                     </h1>
                 </div>
                 <Button 
@@ -33,66 +40,81 @@ const sidebarStore = useSidebarStore()
                     class="flex-shrink-0"
                     @click="sidebarStore.toggle()"
                 >
-                    <PanelRightClose 
+                    <PanelRightOpen
                         v-if="sidebarStore.isOpen" 
                         class="!w-5 !h-5"
                     />
-                    <PanelRightOpen 
+                    <PanelRightClose 
                         v-else 
                         class="!w-5 !h-5"
                     />
                 </Button>
             </SideBarHeader>
-            <SidebarContent class="mt-4 overflow-hidden">
-                <div class="space-y-2">
-                    <NuxtLink 
-                        to="/"
-                        active-class=""
-                        class="flex items-center space-x-2 transition-all duration-200 ease-in-out transform"
-                        :class="{ 
-                            'opacity-0 -translate-x-full': !sidebarStore.isOpen, 
-                            'opacity-100 translate-x-0': sidebarStore.isOpen 
-                        }"
-                        style="transition-delay: 150ms;"
-                    >
-                        <span>Accueil</span>
-                    </NuxtLink>
-                    <NuxtLink 
-                        to="/about" 
-                        active-class=""
-                        class="flex items-center space-x-2 transition-all duration-200 ease-in-out transform"
-                        :class="{ 
-                            'opacity-0 -translate-x-full': !sidebarStore.isOpen, 
-                            'opacity-100 translate-x-0': sidebarStore.isOpen 
-                        }"
-                        style="transition-delay: 200ms;"
-                    >
-                        <span>À propos</span>
-                    </NuxtLink>
-                    <NuxtLink 
-                        to="/contact" 
-                        active-class=""
-                        class="flex items-center space-x-2 transition-all duration-200 ease-in-out transform"
-                        :class="{ 
-                            'opacity-0 -translate-x-full': !sidebarStore.isOpen, 
-                            'opacity-100 translate-x-0': sidebarStore.isOpen 
-                        }"
-                        style="transition-delay: 250ms;"
-                    >
-                        <span>Contact</span>
-                    </NuxtLink>
-                </div>
+            <SidebarContent class="mt-4 space-y-2" :class="{ 
+                    'w-9': !sidebarStore.isOpen
+                }">
+                <NuxtLink 
+                    v-if="sidebarStore.isOpen"
+                    to="/" 
+                    active-class="bg-muted"
+                    class="px-2 py-2 rounded-lg flex items-center space-x-2 whitespace-nowrap text-ellipsis"
+                >
+                    <House class="w-4 h-4" />
+                    <span>Accueil</span>
+                </NuxtLink>
+                <NuxtLink 
+                    v-else
+                    to="/" 
+                    active-class="bg-muted"
+                    class="w-9 h-9 rounded-lg flex items-center justify-center"
+                >
+                    <House class="w-5 h-5" />
+                </NuxtLink>
+
+                <NuxtLink 
+                    v-if="sidebarStore.isOpen"
+                    to="/holidays"
+                    active-class="bg-muted"
+                    class="px-2 py-2 rounded-lg flex items-center space-x-2 whitespace-nowrap text-ellipsis"
+                >
+                    <Caravan class="w-4 h-4" />
+                    <span>Holidays</span>
+                </NuxtLink>
+                <NuxtLink 
+                    v-else
+                    to="/holidays"
+                    active-class="bg-muted"
+                    class="w-9 h-9 rounded-lg flex items-center justify-center"
+                >
+                    <Caravan class="w-5 h-5" />
+                </NuxtLink>
+
+                <NuxtLink 
+                    v-if="sidebarStore.isOpen"
+                    to="/passengers" 
+                    active-class="bg-muted"
+                    class="px-2 py-2 rounded-lg flex items-center space-x-2 whitespace-nowrap text-ellipsis"
+                >   
+                    <Plane class="w-4 h-4" />
+                    <span>Passengers</span>
+                </NuxtLink>
+                <NuxtLink 
+                    v-else
+                    to="/passengers" 
+                    active-class="bg-muted"
+                    class="w-9 h-9 rounded-lg flex items-center justify-center"
+                >   
+                    <Plane class="w-5 h-5" />
+                </NuxtLink>
             </SidebarContent>
             <SidebarFooter class="overflow-hidden">
                 <span 
-                    class="transition-all duration-200 ease-in-out transform block"
+                    class="block text-sm text-muted-foreground"
                     :class="{ 
-                        'opacity-0 -translate-x-full': !sidebarStore.isOpen, 
-                        'opacity-100 translate-x-0': sidebarStore.isOpen 
+                        'hidden': !sidebarStore.isOpen
                     }"
-                    style="transition-delay: 300ms;"
                 >
-                    Salut
+                    @ 2025 Mon App
                 </span>
             </SidebarFooter>
         </Sidebar>
@@ -101,9 +123,3 @@ const sidebarStore = useSidebarStore()
         </main>
     </div>
 </template>
-
-<style scoped>
-.overflow-hidden {
-    overflow: hidden;
-}
-</style>
