@@ -566,3 +566,44 @@ def get_totals_by_date_country():
             "error": "Erreur lors du traitement des données",
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@passengers_bp.get('/date')
+@swag_from({
+    "tags": ["Passengers"],
+    "description": "Route qui renvoi le nombre de passagers par années et mois en JSON",
+    "responses": {
+        200: {
+            "description": "Nombre de passagers par années et mois",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "2010-01": {
+                        "type": "number",
+                        "example": 28902
+                    },
+                    "2010-07": {
+                        "type": "number",
+                        "example": 102
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors du traitement des données"}
+    }
+})
+def get_monthly_data_by_country():
+    """
+    Fonction qui renvoi un dictionnaire avec en clé
+    le mois et l'année et en valeur le nombre de passangers
+    """
+
+    try:
+        result = passengers_service.get_passengers_by_date()
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR

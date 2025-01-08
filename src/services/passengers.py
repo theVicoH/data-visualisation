@@ -182,3 +182,19 @@ class PassengersService:
         return {
             "countries": result
         }
+
+    def get_passengers_by_date(self):
+        """
+        Fonction qui renvoie un dictionnaire avec en clé la date (YYYY-MM)
+        et en valeur le nombre total de passagers
+        """
+        passengers_df = self.df
+
+        passengers_df['YearMonth'] = (
+            passengers_df['Year'].astype(str) + '-' +
+            passengers_df['Month'].astype(str).str.zfill(2)
+        )
+
+        passengers_dict = passengers_df.groupby('YearMonth')['Total'].sum().to_dict()
+
+        return passengers_dict
