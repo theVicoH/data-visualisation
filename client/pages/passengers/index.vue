@@ -1,31 +1,35 @@
 <script setup lang="ts">
-    const nuxtApp = useNuxtApp()
-    const { data : passengersTotalsWorld } = await useAsyncData(
-        `passengers-totals-world`,
-        () => $fetch('/api/passengers/passengers-totals-world'), {
-            getCachedData: key => nuxtApp?.payload?.data[key] || null
-        }
-    )
-    
-    const countriesTotal = Object.values(passengersTotalsWorld.value)[0]
-    
-    const passengersTotalsWorldData = Object.values(passengersTotalsWorld.value)
-        .filter((_, index) => index !== 0)
-    
-    const passengersTotalsWorldLabel = Object.keys(passengersTotalsWorld.value)
-        .filter(label => label !== 'countries')
+const nuxtApp = useNuxtApp()
+const selectedCountry = ref('FRA')
 
+const { data : passengersTotalsWorld } = await useAsyncData(
+    `passengers-totals-world`,
+    () => $fetch('/api/passengers/passengers-totals-world'), {
+        getCachedData: key => nuxtApp?.payload?.data[key] || null
+    }
+)
 
-    const fra = "FRA"
+const countriesTotal = Object.values(passengersTotalsWorld.value)[0]
 
-    const { data: passengersCountryData } = await useAsyncData(
-        'passengers-country-by-iso3',
-        () => $fetch(`/api/passengers/passengers-country-by-iso3/${fra}`), {
-            getCachedData: key => nuxtApp?.payload?.data[key] || null
-        }
-    )
-    const countryData = Object.values(passengersCountryData.value)[1]
-    console.log(countryData)
+const passengersTotalsWorldData = Object.values(passengersTotalsWorld.value)
+    .filter((_, index) => index !== 0)
+
+const passengersTotalsWorldLabel = Object.keys(passengersTotalsWorld.value)
+    .filter(label => label !== 'countries')
+
+const { data: passengersCountryData } = await useAsyncData(
+    'passengers-country-by-iso3',
+    () => $fetch(`/api/passengers/passengers-country-by-iso3/${selectedCountry.value}`), {
+        getCachedData: key => nuxtApp?.payload?.data[key] || null
+    }
+)
+
+const countryData = computed(() => Object.values(passengersCountryData.value)[1])
+
+const updateCountry = async (newCountry: string) => {
+  selectedCountry.value = newCountry
+  await refreshNuxtData('passengers-country-by-iso3')
+}
 </script>
 
 <template>
@@ -50,8 +54,16 @@
                     :labels="passengersTotalsWorldLabel"
                 />
             </div>
-            <div class="col-span-3 bg-card rounded-xl p-6 h-[500px]">
-                <CountryISO3LineChart :data="countryData" />
+            <div class="col-span-3 bg-card rounded-xl p-6">
+                <div class="mb-4">
+                    <CountrySelect 
+                        :selected="selectedCountry"
+                        @update="updateCountry"
+                    />
+                </div>
+                <div class="h-[500px]">
+                    <CountryISO3LineChart :data="countryData" />
+                </div>
             </div>
         </div>
     </div>

@@ -1,8 +1,9 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import Chart from 'chart.js/auto'
 
 const chartRef = ref(null)
+let chart = null
 const props = defineProps({
   data: {
     type: Array,
@@ -11,14 +12,22 @@ const props = defineProps({
   }
 })
 
-onMounted(() => {
-    console.log(props.data)
+const updateChart = () => {
+  if (!chartRef.value) return
+
   const ctx = chartRef.value.getContext('2d')
-  
   const labels = props.data.map(item => `${item.month}/${item.year}`)
   const totals = props.data.map(item => item.total)
-  
-  new Chart(ctx, {
+
+  // Si le graphique existe déjà, le mettre à jour
+  if (chart) {
+    chart.data.labels = labels
+    chart.data.datasets[0].data = totals
+    chart.update()
+    return
+  }
+
+  chart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
@@ -52,6 +61,21 @@ onMounted(() => {
       }
     }
   })
+}
+
+onMounted(() => {
+  updateChart()
+})
+
+watch(() => props.data, () => {
+  updateChart()
+}, { deep: true })
+
+onUnmounted(() => {
+  if (chart) {
+    chart.destroy()
+    chart = null
+  }
 })
 </script>
 
