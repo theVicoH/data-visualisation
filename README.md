@@ -36,6 +36,7 @@ Before running the development server, create a `.env` file in the root of the c
 # .env
 API_URL="http://127.0.0.1:5000"
 ```
+Install dependencies & run development server
 ```
 cd client
 pnpm install
