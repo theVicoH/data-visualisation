@@ -31,6 +31,11 @@ To access api documentation go to http://127.0.0.1:5000/apidocs
 ## Client
 
 ### Set up locally
+Before running the development server, create a `.env` file in the root of the client directory and add the necessary environment variables.
+```
+# .env
+API_URL="http://127.0.0.1:5000"
+```
 ```
 cd client
 pnpm install
