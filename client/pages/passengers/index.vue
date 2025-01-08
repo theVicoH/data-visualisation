@@ -14,10 +14,22 @@
     
     const passengersTotalsWorldLabel = Object.keys(passengersTotalsWorld.value)
         .filter(label => label !== 'countries')
+
+
+    const fra = "FRA"
+
+    const { data: passengersCountryData } = await useAsyncData(
+        'passengers-country-by-iso3',
+        () => $fetch(`/api/passengers/passengers-country-by-iso3/${fra}`), {
+            getCachedData: key => nuxtApp?.payload?.data[key] || null
+        }
+    )
+    const countryData = Object.values(passengersCountryData.value)[1]
+    console.log(countryData)
 </script>
 
 <template>
-    <div class="bg-background border-t w-full h-full">
+    <div class="bg-background border-t w-full h-full overflow-y-auto">
         <header class="flex gap-2 items-center p-6">
             <h2 class="font-semibold text-6xl">Passengers</h2>
         </header>
@@ -37,6 +49,9 @@
                     :data="passengersTotalsWorldData"
                     :labels="passengersTotalsWorldLabel"
                 />
+            </div>
+            <div class="col-span-3 bg-card rounded-xl p-6 h-[500px]">
+                <CountryISO3LineChart :data="countryData" />
             </div>
         </div>
     </div>
