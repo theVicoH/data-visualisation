@@ -6,7 +6,9 @@ HOLIDAY_TYPES = [
     "Observance",
     "Local holiday",
     "Local observance",
-    "Special holiday"
+    "Special holiday",
+    "Half-day holiday",
+    "Working day (replacement)"
 ]
 
 class HolidaysService:
@@ -165,3 +167,14 @@ class HolidaysService:
             filtered_df = self.df
 
         return {"total": len(filtered_df)}
+
+    def get_holiday_and_holiday_type(self):
+        """
+        Fonction qui renvoi un dictionnaire avec en clé
+        le jour férié et en valeur le type de jour fériés
+        """
+        filtered_df = self.df
+
+        holiday_dict = filtered_df.set_index('Date')['Type'].to_dict()
+
+        return holiday_dict

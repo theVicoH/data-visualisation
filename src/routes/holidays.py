@@ -18,7 +18,8 @@ holidays_service = HolidaysService()
             "required": False,
             "description": 
                 "Type de jour férié à filtrer. Types valides : "
-                "Public holiday, Observance, Local holiday, Local observance, Special holiday.",
+                "Public holiday, Observance, Local holiday, Local observance, Special holiday, "
+                "Half-day holiday, Working day (replacement)",
             "example": "Public holiday"
         }
     ],
@@ -87,7 +88,8 @@ def get_holidays_by_country():
             "required": False,
             "description": 
                 "Type de jour férié à filtrer. Types valides : "
-                "Public holiday, Observance, Local holiday, Local observance, Special holiday.",
+                "Public holiday, Observance, Local holiday, Local observance, Special holiday, "
+                "Half-day holiday, Working day (replacement)",
             "example": "Public holiday"
         }
     ],
@@ -181,7 +183,8 @@ def get_holiday_for_one_country(iso3):
             "required": False,
             "description": 
                 "Type de jour férié à filtrer. Types valides : "
-                "Public holiday, Observance, Local holiday, Local observance, Special holiday.",
+                "Public holiday, Observance, Local holiday, Local observance, Special holiday, "
+                "Half-day holiday, Working day (replacement)",
             "example": "Public holiday"
         }
     ],
@@ -472,7 +475,8 @@ def get_holidays_by_month():
             "required": False,
             "description": 
                 "Type de jour férié à filtrer. Types valides : "
-                "Public holiday, Observance, Local holiday, Local observance, Special holiday.",
+                "Public holiday, Observance, Local holiday, Local observance, Special holiday, "
+                "Half-day holiday, Working day (replacement)",
             "example": "Public holiday"
         }
     ],
@@ -526,5 +530,46 @@ def get_total_holidays():
     except ImportError as error:
         return jsonify({
             "error": "Erreur lors du traitement des données de globals_holidays.csv ",
+            "details": str(error)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@holidays_bp.get('/holiday-and-holiday-type')
+@swag_from({
+    "tags": ["Holidays"],
+    "description": "Route qui renvoi les jours fériés et leur type en JSON",
+    "responses": {
+        200: {
+            "description": "Jours fériés et leur type",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "2010-01-01": {
+                        "type": "string",
+                        "example": "Public holiday"
+                    },
+                    "2010-01-02": {
+                        "type": "string",
+                        "example": "Public holiday"
+                    }
+                }
+            }
+        },
+        500: {"description": "Erreur lors du traitement des données de globals_holidays.csv"}
+    }
+})
+def get_holiday_and_holiday_type():
+    """
+    Fonction qui renvoi un dictionnaire avec en clé
+    le jour férié et en valeur le type de jour fériés
+    """
+
+    try:
+        result = holidays_service.get_holiday_and_holiday_type()
+
+        return jsonify(result), HTTPStatus.OK
+
+    except ImportError as error:
+        return jsonify({
+            "error": "Erreur lors du traitement des données de globals_holidays.csv",
             "details": str(error)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
