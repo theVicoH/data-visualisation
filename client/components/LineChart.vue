@@ -21,11 +21,17 @@
         grid: {
             type: Boolean,
             default: false
+        },
+
+        datasetsLabel: {
+            type: String,
+            default: ''
         }
     })
 
     const datasets = [
         {
+            label:props.datasetsLabel,
             data: props.data,
             backgroundColor: props.colorChart
         }

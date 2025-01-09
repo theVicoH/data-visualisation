@@ -63,7 +63,7 @@ const passengersTotalCountryLabels = Object.keys(passengersTotalCountry.value.co
                     :labels="passengersTotalsWorldLabel"
                 />
             </div>
-            <div class="col-span-3 bg-card rounded-xl p-6 h-96">
+            <div class="col-span-3 bg-card rounded-xl p-6">
                 <BarChart
                     :data="passengersTotalCountryData"
                     :labels="passengersTotalCountryLabels"
