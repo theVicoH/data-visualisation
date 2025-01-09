@@ -30,6 +30,15 @@ const updateCountry = async (newCountry: string) => {
   selectedCountry.value = newCountry
   await refreshNuxtData('passengers-country-by-iso3')
 }
+
+const { data: passengersTotalCountry } = await useAsyncData(
+    'passengers-totals-total-country',
+    () => $fetch('/api/passengers/passengers-totals-total-country'), {
+        getCachedData: key => nuxtApp?.payload?.data[key] || null
+    }
+)
+
+console.log(passengersTotalCountry.value.country_totals)
 </script>
 
 <template>
