@@ -15,7 +15,7 @@
 
         colorChart: {
             type: Array as () => string[],
-            default: () => ["#C5D1EB", "#92AFD7", "#5A7684", "#395B50", "#D8DCFF", "#AEADF0", "#C38D94", "#A76571", "#565676"]
+            default: () => ["#1C2222", "#495A5A", "#789191", "#B0BFBF"]
         },
 
         stackedBars: {

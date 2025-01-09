@@ -24,7 +24,8 @@
 
     const datasets = [{
       data: props.data,
-      borderWidth: 1
+      backgroundColor: ["#1C2222", "#495A5A", "#789191", "#B0BFBF"],
+      borderWidth: 1,
     }]
 
     if (chart) {

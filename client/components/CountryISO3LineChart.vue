@@ -33,8 +33,7 @@ const updateChart = () => {
       datasets: [{
         label: 'Total passagers',
         data: totals,
-        borderColor: '#4F46E5',
-        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+        borderColor: "#1C2222",
         tension: 0.4,
         fill: true
       }]
