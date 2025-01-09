@@ -37,8 +37,8 @@ const { data: passengersTotalCountry } = await useAsyncData(
         getCachedData: key => nuxtApp?.payload?.data[key] || null
     }
 )
-
-console.log(passengersTotalCountry.value.country_totals)
+const passengersTotalCountryData = Object.values(passengersTotalCountry.value.country_totals)
+const passengersTotalCountryLabels = Object.keys(passengersTotalCountry.value.country_totals)
 </script>
 
 <template>
@@ -61,6 +61,12 @@ console.log(passengersTotalCountry.value.country_totals)
                 <DoughnutChart
                     :data="passengersTotalsWorldData"
                     :labels="passengersTotalsWorldLabel"
+                />
+            </div>
+            <div class="col-span-3 bg-card rounded-xl p-6 h-96">
+                <BarChart
+                    :data="passengersTotalCountryData"
+                    :labels="passengersTotalCountryLabels"
                 />
             </div>
             <div class="col-span-3 bg-card rounded-xl p-6">
