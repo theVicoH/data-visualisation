@@ -19,5 +19,6 @@
     <BarChart
         :data="holidaysTypeByPassengersData"
         :labels="holidaysTypeByPassengersLabels"
+        :datasets-label="['Nombre de passagers']"
     />
 </template>
