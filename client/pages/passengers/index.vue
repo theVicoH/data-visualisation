@@ -57,7 +57,7 @@ const passengersTotalCountryLabels = Object.keys(passengersTotalCountry.value.co
                 <p class="text-2xl font-medium text-center mt-24">Milliard de voyageur</p>
             </div>
 
-            <div class="col-span-3 bg-card rounded-xl p-6 h-96">
+            <div class="col-span-3 bg-card rounded-xl p-6 h-96 flex justify-center">
                 <DoughnutChart
                     :data="passengersTotalsWorldData"
                     :labels="passengersTotalsWorldLabel"
@@ -76,9 +76,7 @@ const passengersTotalCountryLabels = Object.keys(passengersTotalCountry.value.co
                         @update="updateCountry"
                     />
                 </div>
-                <div class="h-[500px]">
-                    <CountryISO3LineChart :data="countryData" />
-                </div>
+                <CountryISO3LineChart :data="countryData" />
             </div>
         </div>
     </div>

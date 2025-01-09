@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue'
 import Chart from 'chart.js/auto'
 
 const chartRef = ref(null)
@@ -42,7 +41,7 @@ const updateChart = () => {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
+      maintainAspectRatio: true,
       plugins: {
         legend: {
           display: true,
