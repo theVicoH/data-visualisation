@@ -76,7 +76,7 @@ const sidebarStore = useSidebarStore()
                                 sidebarStore.isOpen ? 'w-4 h-4' : 'w-5 h-5'
                             ]" 
                         />
-                        <span v-if="sidebarStore.isOpen">Accueil</span>
+                        <span v-if="sidebarStore.isOpen">Holidays & Passengers</span>
                     </NuxtLink>
 
                     <NuxtLink 
