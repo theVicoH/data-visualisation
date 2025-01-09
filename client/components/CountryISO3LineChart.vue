@@ -49,12 +49,20 @@ const updateChart = () => {
         }
       },
       scales: {
+        x: {
+          grid: {
+            display: false
+          }
+        },
         y: {
           beginAtZero: true,
           ticks: {
             callback: function(value) {
               return new Intl.NumberFormat('fr-FR').format(value)
             }
+          },
+          grid: {
+            display: false
           }
         }
       }

@@ -121,7 +121,7 @@ const sidebarStore = useSidebarStore()
                 v-if="sidebarStore.isOpen"
                 class="block text-sm text-gray-500 dark:text-gray-400"
             >
-                @ 2025 Mon App
+                @ 2025 Fly Days
             </span>
         </aside>
 

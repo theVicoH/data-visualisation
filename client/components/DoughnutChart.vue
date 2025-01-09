@@ -1,73 +1,83 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
-import Chart from 'chart.js/auto'
 
-const props = defineProps({
-  data: {
-    type: Array,
-    required: true
-  },
-  labels: {
-    type: Array,
-    required: true
-  }
-})
+  import Chart from 'chart.js/auto'
 
-let chart: Chart | null = null
-
-const initChart = () => {
-  const ctx = document.getElementById('donutChart') as HTMLCanvasElement
-  
-  if (chart) {
-    chart.destroy()
-  }
-
-  chart = new Chart(ctx, {
-    type: 'doughnut',
+  const props = defineProps({
     data: {
-      labels: props.labels,
-      datasets: [{
-        data: props.data,
-        backgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56',
-          '#4BC0C0'
-        ],
-        borderWidth: 1
-      }]
+      type: Array,
+      required: true
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            padding: 20,
-            font: {
-              size: 12
+    labels: {
+      type: Array,
+      required: true
+    }
+  })
+
+  const chartRef = ref<HTMLCanvasElement | null>(null)
+  let chart: any = null
+
+  const updateChart = () => {
+    if (!chartRef.value) return
+
+    const ctx = chartRef.value.getContext('2d')
+    if (!ctx) return
+
+    const datasets = [{
+      data: props.data,
+      borderWidth: 1
+    }]
+
+    if (chart) {
+      chart.data.labels = props.labels
+      chart.data.datasets = datasets
+      chart.update()
+      return
+    }
+
+    chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: props.labels,
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              font: {
+                size: 12
+              }
             }
           }
         }
       }
+    })
+  }
+
+  onMounted(() => {
+    updateChart()
+  })
+
+  watch(() => props.data, () => {
+    updateChart()
+  }, { deep: true })
+
+  watch(() => props.labels, () => {
+    updateChart()
+  })
+
+  onUnmounted(() => {
+    if (chart) {
+      chart.destroy()
+      chart = null
     }
   })
-}
-
-onMounted(() => {
-  initChart()
-})
-
-watch(() => props.data, () => {
-  initChart()
-})
-
-watch(() => props.labels, () => {
-  initChart()
-})
 </script>
 
 <template>
-  <canvas id="donutChart"></canvas>
+  <canvas ref="chartRef"></canvas>
 </template>
