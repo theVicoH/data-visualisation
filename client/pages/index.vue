@@ -2,8 +2,6 @@
 
     const nuxtApp = useNuxtApp()
 
-    const selectedCountry = ref('FRA')
-
     const { data : holidaysTotalWorld } = await useAsyncData(
         `holidays-totals-world`,
         () => $fetch('/api/holidays/total'), {
